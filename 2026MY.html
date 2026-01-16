@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>2026 馬來西亞雙城漫遊 | 深度豐富版</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        nanyang: {
+                            50: '#fcfaf8', // 背景米色
+                            100: '#f3ece6',
+                            200: '#e7d5c0',
+                            500: '#d97706', // 琥珀黃 (重點色)
+                            700: '#0f766e', // 復古綠 (標題/按鈕)
+                            900: '#78350f', // 深褐 (文字)
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Leaflet CSS & JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #fcfaf8; color: #4a4a4a; }
+        
+        /* Hide scrollbar for clean UI */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        /* Map Container - Adjusted for vertical layout */
+        #map-container { height: 400px; width: 100%; position: relative; border-radius: 12px; overflow: hidden; }
+        #map { height: 100%; width: 100%; z-index: 10; }
+        
+        /* Sections are now just stacked blocks */
+        .section-block { 
+            padding: 2rem 1rem; 
+            border-bottom: 1px dashed #e5e7eb;
+            scroll-margin-top: 70px; /* For anchor scrolling */
+        }
+        .section-block:last-child { border-bottom: none; }
+
+        /* Sub-View Toggle (Map vs List) */
+        .view-toggle-btn.active {
+            background-color: #d97706;
+            color: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body class="bg-nanyang-50">
+
+    <!-- DATA STORAGE (JSON) -->
+    <script>
+        const travelData = {
+            meta: {
+                title: "2026 馬來西亞雙城慢活之旅",
+                dates: "2026/02/26 - 03/05",
+                travelers: "慢活老饕"
+            },
+            stats: {
+                labels: ['Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5', 'Day 6', 'Day 7', 'Day 8'],
+                intensity: [4, 8, 9, 6, 7, 8, 9, 3] 
+            },
+            days: [
+                {
+                    day: 1, date: "2/26 (四)", city: "檳城", title: "抵達檳城：美食馬拉松",
+                    locations: [
+                        { time: "16:25", title: "檳城機場 (PEN)", type: "transport", coords: [5.2942, 100.2592], desc: "班機 FD321 抵達。請備妥護照，辦理入境約需 40-60 分鐘。" },
+                        { time: "18:30", title: "Veno Hotel", type: "stay", coords: [5.4164, 100.3233], desc: "搭乘 Grab 抵達 (約 RM30)。位於中路，地理位置絕佳，放下行李稍作休息。" },
+                        { time: "19:30", title: "中路大排檔", type: "food", coords: [5.4160, 100.3235], desc: "飯店下樓即達。推薦：檳城蠔煎（蛋香濃郁）、炭燒雞翅、炒粿條。" },
+                        { time: "21:00", title: "汕頭街 (Kimberley St)", type: "food", coords: [5.4162, 100.3326], desc: "宵夜戰場！必吃四大天王：權記鴨粥粿汁（湯頭濃郁）、天皇雞腳、四果湯。" }
+                    ]
+                },
+                {
+                    day: 2, date: "2/27 (五)", city: "檳城", title: "喬治市：古蹟與娘惹",
+                    locations: [
+                        { time: "09:30", title: "觀音亭 (Kuan Im Teng)", type: "culture", coords: [5.4198, 100.3377], desc: "檳城最古老華人廟宇，香火鼎盛。順路可看旁邊的聖喬治教堂 (St. George's Church)。" },
+                        { time: "11:00", title: "張弼士故居 (藍屋)", type: "culture", coords: [5.4222, 100.3353], desc: "【預約制】參加 11:00 導覽。這座靛藍色豪宅曾獲聯合國教科文組織獎，建築細節極美。" },
+                        { time: "12:30", title: "小印度 (Little India)", type: "food", coords: [5.4168, 100.3396], desc: "午餐體驗：在香料味中用手抓香蕉葉飯 (Banana Leaf Rice)，再來一杯熱拉茶 (Teh Tarik)。" },
+                        { time: "14:00", title: "娘惹博物館", type: "culture", coords: [5.4173, 100.3414], desc: "參觀海峽華人富商的奢華生活，數千件金飾與精美餐具，是了解峇峇娘惹文化的最佳地點。" },
+                        { time: "16:00", title: "本頭公巷 (壁畫街)", type: "culture", coords: [5.4148, 100.3382], desc: "散步尋找「姊弟共騎」、「爬牆小孩」等著名鐵線畫與壁畫，適合午後漫步。" },
+                        { time: "17:30", title: "康華利斯堡 & 紀念碑", type: "culture", coords: [5.4206, 100.3435], desc: "檳城最古老的星形要塞，旁邊海濱有二戰紀念碑，適合看海吹風。" },
+                        { time: "18:30", title: "姓周橋 (Chew Jetty)", type: "view", coords: [5.4125, 100.3395], desc: "最完整的水上人家聚落，傍晚夕陽映照在木棧道上非常美，有些許紀念品小店。" },
+                        { time: "19:30", title: "牛干冬 (Chulia St)", type: "food", coords: [5.4182, 100.3365], desc: "晚餐：著名的雲吞麵（皮薄餡多）、咖哩麵。這裡也是背包客聚集地，氛圍熱鬧。" }
+                    ]
+                },
+                {
+                    day: 3, date: "2/28 (六)", city: "檳城", title: "亞依淡：山海燈影",
+                    locations: [
+                        { time: "10:30", title: "光大 (KOMTAR)", type: "view", coords: [5.4146, 100.3297], desc: "挑戰 68 樓彩虹玻璃步道 (The Gravityz)，360度俯瞰喬治市全景。樓下可順便吃著名的「檳城路馳名潮州煎蕊」。" },
+                        { time: "13:00", title: "亞依淡巴剎叻沙", type: "food", coords: [5.4011, 100.2783], desc: "極樂寺腳下的傳奇美食。湯頭充滿魚肉碎與蝦膏香氣，酸辣開胃。" },
+                        { time: "14:30", title: "升旗山 (Penang Hill)", type: "view", coords: [5.4085, 100.2771], desc: "搭乘纜車上山避暑。推薦參觀 The Habitat 生態公園與 Curtis Crest 樹頂步道。" },
+                        { time: "17:30", title: "極樂寺 (Kek Lok Si)", type: "culture", coords: [5.3996, 100.2736], desc: "東南亞最大佛寺。參觀萬佛寶塔與巨大的觀音聖像。從升旗山下山後搭 Grab 5分鐘即達。" },
+                        { time: "19:00", title: "極樂寺新春燈會", type: "view", coords: [5.3996, 100.2736], desc: "【農曆年限定】全寺萬盞燈籠齊亮，整座山頭金碧輝煌。建議待到天黑 (約 19:30) 拍攝最佳效果。" }
+                    ]
+                },
+                {
+                    day: 4, date: "3/1 (日)", city: "雙城", title: "移動日：轉場吉隆坡",
+                    locations: [
+                        { time: "08:30", title: "吉寧萬山 (Chowrasta)", type: "shopping", coords: [5.4175, 100.3318], desc: "檳城最老菜市場。採買現烤豆沙餅、馬蹄酥當伴手禮，感受在地早市活力。" },
+                        { time: "09:30", title: "七條路巴剎", type: "food", coords: [5.4042, 100.3312], desc: "最後早餐：鴨肉粿條湯（湯頭清甜）、曼煎糕（厚實花生餡）。" },
+                        { time: "13:25", title: "檳城機場 (PEN)", type: "transport", coords: [5.2942, 100.2592], desc: "搭乘 AK6125 前往吉隆坡。國內線無需過海關，但仍需查驗證件。" },
+                        { time: "14:30", title: "KLIA T2", type: "transport", coords: [2.7433, 101.6981], desc: "抵達吉隆坡。搭乘機場快線 (KLIA Ekspres) 至 KL Sentral (約 35分)。" },
+                        { time: "16:00", title: "Sleeping Lion Suites", type: "stay", coords: [3.1472, 101.7135], desc: "從 KL Sentral 轉乘單軌 (Monorail) 至 Bukit Bintang 站，步行至飯店辦理入住。" },
+                        { time: "18:00", title: "KLCC & Saloma Link", type: "view", coords: [3.1579, 101.7116], desc: "欣賞雙子星塔夜景與音樂噴泉。步行至 Saloma Link 行人天橋拍攝科幻感夜景。" }
+                    ]
+                },
+                {
+                    day: 5, date: "3/2 (一)", city: "吉隆坡", title: "老城區與開齋市集",
+                    locations: [
+                        { time: "10:00", title: "占美回教堂", type: "culture", coords: [3.1492, 101.6958], desc: "吉隆坡發源地（兩河交匯處），參觀摩爾式建築。旁邊就是「生命之河」景觀。" },
+                        { time: "11:00", title: "獨立廣場", type: "view", coords: [3.1491, 101.6937], desc: "拍照打卡：蘇丹阿都沙末大廈、巨大的馬來西亞國旗。" },
+                        { time: "12:00", title: "中央市場 (Central Market)", type: "shopping", coords: [3.1453, 101.6953], desc: "有冷氣的工藝品市集，適合買蠟染、木雕。二樓有美食街可簡單午餐。" },
+                        { time: "14:30", title: "陳氏書院 & 鬼仔巷", type: "culture", coords: [3.1432, 101.6975], desc: "茨廠街周邊。鬼仔巷有復古壁畫，陳氏書院則有精美的廣東陶塑。" },
+                        { time: "16:30", title: "甘榜峇魯市集 (Kg Baru)", type: "food", coords: [3.1618, 101.7037], desc: "【齋戒月限定】吉隆坡最著名的 Ramadan Bazaar。背景是雙子塔，前景是傳統高腳屋與無數美食攤位。體驗開齋前的熱鬧。" },
+                        { time: "19:00", title: "亞羅街 (Jalan Alor)", type: "food", coords: [3.1458, 101.7088], desc: "觀光客必去的美食街。推薦：黃亞華燒雞翼、烤魔鬼魚、沙爹。" }
+                    ]
+                },
+                {
+                    day: 6, date: "3/3 (二)", city: "吉隆坡", title: "巴生肉骨茶 & 元宵",
+                    locations: [
+                        { time: "09:30", title: "巴生盛發肉骨茶", type: "food", coords: [3.0415, 101.4484], desc: "搭 Grab (約50分) 前往巴生。推薦「橋底」老店，湯頭濃郁，必加點「乾肉骨茶」超下飯。" },
+                        { time: "13:30", title: "The Exchange TRX", type: "shopping", coords: [3.1432, 101.7183], desc: "吉隆坡最新地標商場。頂樓有空中花園 (TRX City Park)，適合午後散步拍照。" },
+                        { time: "18:30", title: "天后宮 (Thean Hou)", type: "culture", coords: [3.1213, 101.6871], desc: "【元宵節重點】萬盞紅燈籠齊亮，是大馬新年最美的場景。人潮眾多，建議提早抵達並預約回程車輛。" }
+                    ]
+                },
+                {
+                    day: 7, date: "3/4 (三)", city: "吉隆坡", title: "黑風洞 & 康樂夜市",
+                    locations: [
+                        { time: "08:00", title: "黑風洞 (Batu Caves)", type: "culture", coords: [3.2374, 101.6839], desc: "趁早出發避開烈日。挑戰 272 級彩色階梯與巨大金神像。注意：嚴禁短褲短裙，小心猴子。" },
+                        { time: '11:30', title: '柏威年 (Pavilion KL)', type: 'shopping', coords: [3.1488, 101.7133], desc: '吉隆坡最繁華的購物中心，品牌齊全。午餐可在此享用，順便吹冷氣休息。' },
+                        { time: "18:30", title: "康樂夜市 (Connaught)", type: "food", coords: [3.0817, 101.7348], desc: "【週三限定】全馬最長 2 公里夜市。必吃：臭豆腐、咖哩魚蛋、炸雪糕。請搭 MRT 綠線至 Taman Connaught 站以避開塞車。" }
+                    ]
+                },
+                {
+                    day: 8, date: "3/5 (四)", city: "吉隆坡", title: "平安返台",
+                    locations: [
+                        { time: "09:30", title: "武吉免登早午餐", type: "food", coords: [3.1466, 101.7114], desc: "最後巡禮。找一家傳統 Kopitiam 吃海南吐司配半生熟蛋。" },
+                        { time: "11:30", title: "前往機場", type: "transport", coords: [3.1472, 101.7135], desc: "預留 3 小時以上前往機場。T1 航廈辦理登機。" },
+                        { time: "14:35", title: "吉隆坡機場 (KUL)", type: "transport", coords: [2.7433, 101.6981], desc: "搭乘 CI722 返台。機場免稅店可最後採買。" }
+                    ]
+                }
+            ],
+            tips: [
+                { icon: "fa-car", title: "交通", desc: "全程推薦使用 Grab (綁定信用卡)。康樂夜市請搭 MRT 以免塞車。" },
+                { icon: "fa-shirt", title: "穿著", desc: "黑風洞與清真寺嚴格禁止短褲/短裙。請隨身攜帶薄外套。" },
+                { icon: "fa-moon", title: "齋戒月", desc: "3月為穆斯林齋戒月，19:15前避免當街大吃大喝。" },
+                { icon: "fa-passport", title: "入境", desc: "抵達前3天填寫 MDAC 電子入境卡。" }
+            ]
+        };
+    </script>
+
+    <!-- HEADER (Sticky) -->
+    <div class="bg-white shadow-md z-50 sticky top-0">
+        <div class="px-6 py-4 flex justify-between items-center border-b border-nanyang-100 bg-nanyang-50">
+            <div>
+                <h1 class="text-xl font-bold text-nanyang-900 tracking-wide">🇲🇾 雙城慢活之旅</h1>
+                <p class="text-xs text-gray-500 mt-1">2026/02/26 - 03/05 • 檳城 & 吉隆坡</p>
+            </div>
+            <div class="text-nanyang-500 text-2xl">
+                <i class="fa-solid fa-umbrella-beach"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN CONTAINER (Vertical Scroll) -->
+    <main class="max-w-3xl mx-auto pb-20">
+        
+        <!-- BLOCK 1: OVERVIEW -->
+        <section class="section-block bg-white">
+            <h2 class="text-xl font-bold text-nanyang-700 mb-4 pl-2 border-l-4 border-nanyang-500">行程總覽</h2>
+            
+            <div class="bg-white rounded-2xl p-4 shadow-sm border border-nanyang-100 mb-4">
+                <h3 class="text-sm font-bold text-gray-500 mb-2">每日體力強度</h3>
+                <div style="height: 200px;">
+                    <canvas id="tripChart"></canvas>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div class="bg-nanyang-100 p-4 rounded-xl">
+                    <div class="text-2xl font-bold text-nanyang-900">8 天</div>
+                    <div class="text-xs text-gray-600">旅程總天數</div>
+                </div>
+                <div class="bg-nanyang-100 p-4 rounded-xl">
+                    <div class="text-2xl font-bold text-nanyang-900">2 城</div>
+                    <div class="text-xs text-gray-600">雙城跨越</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- BLOCK 2: ITINERARY -->
+        <section class="section-block bg-white mt-2">
+            <h2 class="text-xl font-bold text-nanyang-700 mb-4 pl-2 border-l-4 border-nanyang-500">每日詳細行程</h2>
+            
+            <!-- Day Selector (Sticky within content) -->
+            <div class="sticky top-[72px] z-40 bg-white/95 backdrop-blur py-3 border-b border-gray-100 -mx-4 px-4 mb-4 shadow-sm">
+                <div id="day-tabs" class="flex overflow-x-auto no-scrollbar space-x-2">
+                    <!-- JS populated -->
+                </div>
+            </div>
+
+            <!-- View Toggle -->
+            <div class="flex justify-center mb-6">
+                <div class="bg-nanyang-50 p-1 rounded-lg border border-gray-200 flex shadow-sm">
+                    <button onclick="switchItineraryView('list')" id="btn-view-list" class="view-toggle-btn active px-6 py-1.5 rounded-md text-sm font-bold transition-all text-gray-500">
+                        <i class="fa-solid fa-list-ul mr-1"></i> 列表
+                    </button>
+                    <button onclick="switchItineraryView('map')" id="btn-view-map" class="view-toggle-btn px-6 py-1.5 rounded-md text-sm font-bold transition-all text-gray-500">
+                        <i class="fa-regular fa-map mr-1"></i> 地圖
+                    </button>
+                </div>
+            </div>
+
+            <div class="relative min-h-[400px]">
+                
+                <!-- LIST VIEW -->
+                <div id="view-list" class="block animate-fade-in">
+                    <div class="mb-4 text-center">
+                        <h3 id="list-day-title" class="text-lg font-bold text-nanyang-900"></h3>
+                        <p id="list-day-city" class="text-sm text-gray-500 flex items-center justify-center gap-1 mt-1"></p>
+                    </div>
+                    <div id="timeline-container" class="space-y-0 px-2">
+                        <!-- JS Injected -->
+                    </div>
+                </div>
+
+                <!-- MAP VIEW -->
+                <div id="view-map" class="hidden animate-fade-in">
+                    <div id="map-container" class="shadow-inner border border-gray-200">
+                        <div id="map"></div>
+                    </div>
+                    <!-- Map Info Box -->
+                    <div class="mt-4 p-4 bg-nanyang-50 rounded-xl border border-nanyang-100">
+                        <h4 class="font-bold text-nanyang-900 mb-2 text-sm">今日路線站點</h4>
+                        <div id="map-route-list" class="text-sm text-gray-600 space-y-1"></div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- BLOCK 3: ACCOMMODATION & FLIGHTS -->
+        <section class="section-block bg-white mt-2">
+            <h2 class="text-xl font-bold text-nanyang-700 mb-4 pl-2 border-l-4 border-nanyang-500">住宿與航班</h2>
+            
+            <div class="space-y-6">
+                <!-- Accommodation Cards -->
+                <div class="grid gap-4 md:grid-cols-2">
+                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition">
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="text-xs font-bold bg-nanyang-100 text-nanyang-800 px-2 py-1 rounded">檳城 (Day 1-4)</span>
+                            <a href="https://www.google.com/maps/search/?api=1&query=Veno+Hotel+Penang" target="_blank" class="text-nanyang-500 text-sm font-bold flex items-center gap-1">
+                                <i class="fa-solid fa-location-arrow"></i> 導航
+                            </a>
+                        </div>
+                        <h4 class="font-bold text-gray-800 text-lg mb-1">Veno Hotel</h4>
+                        <p class="text-sm text-gray-500 mb-3"><i class="fa-solid fa-map-pin mr-1"></i>111, Jalan Macalister, George Town</p>
+                        <div class="bg-gray-50 p-3 rounded-lg text-xs text-gray-600 border border-gray-100">
+                            <div class="font-bold mb-1 text-gray-700">機場交通 (PEN → Hotel)</div>
+                            <div class="flex justify-between">
+                                <span><i class="fa-solid fa-car mr-1"></i>Grab</span>
+                                <span>~ RM 30 / 40 分鐘</span>
+                            </div>
+                        </div>
+                        <div class="mt-2 text-xs text-nanyang-600 flex items-center gap-1">
+                            <i class="fa-solid fa-star"></i> 下樓即是中路大排檔美食區
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition">
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="text-xs font-bold bg-nanyang-100 text-nanyang-800 px-2 py-1 rounded">吉隆坡 (Day 4-8)</span>
+                            <a href="https://www.google.com/maps/search/?api=1&query=Sleeping+Lion+Suites+Kuala+Lumpur" target="_blank" class="text-nanyang-500 text-sm font-bold flex items-center gap-1">
+                                <i class="fa-solid fa-location-arrow"></i> 導航
+                            </a>
+                        </div>
+                        <h4 class="font-bold text-gray-800 text-lg mb-1">Sleeping Lion Suites</h4>
+                        <p class="text-sm text-gray-500 mb-3"><i class="fa-solid fa-map-pin mr-1"></i>Jalan Walter Grenier, Bukit Bintang</p>
+                        <div class="bg-gray-50 p-3 rounded-lg text-xs text-gray-600 border border-gray-100">
+                            <div class="font-bold mb-1 text-gray-700">機場交通 (KUL → Hotel)</div>
+                            <div class="flex justify-between">
+                                <span><i class="fa-solid fa-train mr-1"></i>KLIA Ekspres + Monorail</span>
+                                <span>~ RM 60 / 50 分鐘</span>
+                            </div>
+                        </div>
+                        <div class="mt-2 text-xs text-nanyang-600 flex items-center gap-1">
+                            <i class="fa-solid fa-star"></i> 步行可達柏威年廣場 (Pavilion)
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Flight Table -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div class="bg-nanyang-50 px-4 py-2 border-b border-nanyang-100 font-bold text-nanyang-800 text-sm">
+                        <i class="fa-solid fa-plane-departure mr-2"></i>航班行程表
+                    </div>
+                    <div class="divide-y divide-gray-100">
+                        <!-- Flight 1 -->
+                        <div class="p-4 flex flex-col gap-2">
+                            <div class="flex justify-between items-center">
+                                <span class="font-bold text-gray-800">FD 321</span>
+                                <span class="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded">去程</span>
+                            </div>
+                            <div class="text-sm text-gray-600 flex justify-between">
+                                <span>曼谷 (DMK) <i class="fa-solid fa-arrow-right mx-1 text-xs"></i> 檳城 (PEN)</span>
+                                <span class="font-mono font-bold">16:25 抵達</span>
+                            </div>
+                            <div class="text-xs text-orange-600 mt-1 bg-orange-50 p-2 rounded">
+                                <i class="fa-regular fa-clock mr-1"></i> 建議 17:40 離開機場 (預留通關時間)
+                            </div>
+                        </div>
+                        <!-- Flight 2 -->
+                        <div class="p-4 flex flex-col gap-2">
+                            <div class="flex justify-between items-center">
+                                <span class="font-bold text-gray-800">AK 6125</span>
+                                <span class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded">國內線</span>
+                            </div>
+                            <div class="text-sm text-gray-600 flex justify-between">
+                                <span>檳城 (PEN) <i class="fa-solid fa-arrow-right mx-1 text-xs"></i> 吉隆坡 (KUL)</span>
+                                <span class="font-mono font-bold">13:25 起飛</span>
+                            </div>
+                            <div class="text-xs text-orange-600 mt-1 bg-orange-50 p-2 rounded">
+                                <i class="fa-regular fa-clock mr-1"></i> 建議 11:30 從飯店出發
+                            </div>
+                        </div>
+                        <!-- Flight 3 -->
+                        <div class="p-4 flex flex-col gap-2">
+                            <div class="flex justify-between items-center">
+                                <span class="font-bold text-gray-800">CI 722</span>
+                                <span class="text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded">回程</span>
+                            </div>
+                            <div class="text-sm text-gray-600 flex justify-between">
+                                <span>吉隆坡 (KUL) <i class="fa-solid fa-arrow-right mx-1 text-xs"></i> 台北 (TPE)</span>
+                                <span class="font-mono font-bold">14:35 起飛</span>
+                            </div>
+                            <div class="text-xs text-orange-600 mt-1 bg-orange-50 p-2 rounded">
+                                <i class="fa-regular fa-clock mr-1"></i> 建議 11:30 出發前往 T1 航廈
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- BLOCK 4: TIPS -->
+        <section class="section-block bg-white mt-2">
+            <h2 class="text-xl font-bold text-nanyang-700 mb-4 pl-2 border-l-4 border-nanyang-500">實用資訊</h2>
+            <div id="tips-list" class="grid gap-3">
+                <!-- JS Populated -->
+            </div>
+        </section>
+
+        <!-- FOOTER -->
+        <footer class="text-center py-8 text-gray-400 text-xs">
+            © 2026 馬來西亞雙城漫遊
+        </footer>
+
+    </main>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // --- 1. STATE MANAGEMENT ---
+        let map;
+        let currentMarkers = [];
+        let currentPolyline = null;
+        let currentChart = null;
+        let currentDayIndex = 0;
+
+        // --- 2. INITIALIZATION ---
+        document.addEventListener('DOMContentLoaded', () => {
+            renderChart();
+            initMap();
+            renderDayTabs();
+            renderTips();
+            
+            // Default to Day 1
+            renderDay(0);
+        });
+
+        function switchItineraryView(view) {
+            const listEl = document.getElementById('view-list');
+            const mapEl = document.getElementById('view-map');
+            const btnList = document.getElementById('btn-view-list');
+            const btnMap = document.getElementById('btn-view-map');
+
+            if (view === 'list') {
+                listEl.classList.remove('hidden');
+                mapEl.classList.add('hidden');
+                btnList.classList.add('active');
+                btnMap.classList.remove('active');
+            } else {
+                listEl.classList.add('hidden');
+                mapEl.classList.remove('hidden');
+                btnList.classList.remove('active');
+                btnMap.classList.add('active');
+                setTimeout(() => { map.invalidateSize(); fitBoundsToCurrentDay(); }, 200);
+            }
+        }
+
+        // --- 3. CHART.JS ---
+        function renderChart() {
+            const ctx = document.getElementById('tripChart').getContext('2d');
+            currentChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: travelData.stats.labels,
+                    datasets: [{
+                        label: '體力強度',
+                        data: travelData.stats.intensity,
+                        backgroundColor: '#d97706',
+                        borderRadius: 6,
+                        barThickness: 15
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, max: 10, grid: { display: false } },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+        }
+
+        // --- 4. LEAFLET MAP & ITINERARY LOGIC ---
+        function initMap() {
+            map = L.map('map', { zoomControl: false }).setView([4.2105, 101.9758], 6);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap',
+                maxZoom: 19
+            }).addTo(map);
+        }
+
+        function renderDayTabs() {
+            const container = document.getElementById('day-tabs');
+            travelData.days.forEach((day, index) => {
+                const btn = document.createElement('button');
+                btn.className = `day-tab-btn flex-shrink-0 px-4 py-2 rounded-full text-xs font-bold border transition-all ${index === 0 ? 'bg-nanyang-500 text-white border-nanyang-500' : 'bg-white text-gray-500 border-gray-200'}`;
+                btn.innerText = `Day ${day.day}`;
+                btn.onclick = (e) => {
+                    document.querySelectorAll('.day-tab-btn').forEach(b => {
+                        b.className = 'day-tab-btn flex-shrink-0 px-4 py-2 rounded-full text-xs font-bold border bg-white text-gray-500 border-gray-200';
+                    });
+                    e.target.className = 'day-tab-btn flex-shrink-0 px-4 py-2 rounded-full text-xs font-bold border bg-nanyang-500 text-white border-nanyang-500 shadow-md';
+                    
+                    renderDay(index);
+                };
+                container.appendChild(btn);
+            });
+        }
+
+        function fitBoundsToCurrentDay() {
+            const dayData = travelData.days[currentDayIndex];
+            const latlngs = dayData.locations.map(loc => loc.coords);
+            if (latlngs.length > 0) {
+                map.flyToBounds(L.latLngBounds(latlngs), { padding: [50, 50], duration: 1 });
+            }
+        }
+
+        function renderDay(index) {
+            currentDayIndex = index;
+            const dayData = travelData.days[index];
+            
+            // Update Text Info
+            document.getElementById('list-day-title').innerText = `${dayData.date} ${dayData.title}`;
+            document.getElementById('list-day-city').innerHTML = `<i class="fa-solid fa-location-dot text-nanyang-500"></i> ${dayData.city}`;
+
+            // --- MAP UPDATE ---
+            currentMarkers.forEach(m => map.removeLayer(m));
+            currentMarkers = [];
+            if (currentPolyline) map.removeLayer(currentPolyline);
+
+            const latlngs = [];
+            const routeListContainer = document.getElementById('map-route-list');
+            routeListContainer.innerHTML = '';
+
+            dayData.locations.forEach((loc, i) => {
+                // Marker
+                const markerHtml = `<div class="flex items-center justify-center w-6 h-6 bg-nanyang-700 text-white rounded-full text-xs font-bold border-2 border-white shadow-md">${i + 1}</div>`;
+                const icon = L.divIcon({ className: 'custom-div-icon', html: markerHtml, iconSize: [24, 24], iconAnchor: [12, 12] });
+                const marker = L.marker(loc.coords, { icon: icon }).bindPopup(`<b>${loc.time} ${loc.title}</b>`).addTo(map);
+                currentMarkers.push(marker);
+                latlngs.push(loc.coords);
+
+                // Map Route List (Simple)
+                routeListContainer.insertAdjacentHTML('beforeend', `
+                    <div class="flex items-center gap-2 py-1">
+                        <span class="text-xs font-bold text-nanyang-500 w-4">${i+1}.</span>
+                        <span class="truncate">${loc.title}</span>
+                    </div>
+                `);
+            });
+
+            if (latlngs.length > 0) {
+                currentPolyline = L.polyline(latlngs, { color: '#d97706', weight: 4, dashArray: '1, 6' }).addTo(map);
+                // Update map view if map mode is currently active
+                if (!document.getElementById('view-map').classList.contains('hidden')) {
+                    map.flyToBounds(L.latLngBounds(latlngs), { padding: [50, 50], duration: 1 });
+                }
+            }
+
+            // --- TIMELINE UPDATE (List View) ---
+            const timelineContainer = document.getElementById('timeline-container');
+            timelineContainer.innerHTML = '';
+
+            dayData.locations.forEach((loc, i) => {
+                const isLast = i === dayData.locations.length - 1;
+                const iconClass = getIconByType(loc.type);
+                
+                const html = `
+                    <div class="relative pl-6 ${!isLast ? 'pb-8 border-l-2 border-nanyang-200' : ''}">
+                        <div class="absolute -left-[7px] top-0 w-4 h-4 rounded-full bg-white border-2 border-nanyang-500 box-border"></div>
+                        <div class="bg-white p-4 rounded-xl border border-nanyang-100 shadow-sm hover:shadow-md transition-shadow">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-xs font-bold text-white bg-nanyang-500 px-2 py-0.5 rounded">${loc.time}</span>
+                                <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(loc.title)}" target="_blank" class="text-blue-500 text-xs font-bold flex items-center gap-1 bg-blue-50 px-2 py-1 rounded-full">
+                                    <i class="fa-solid fa-location-arrow"></i> 導航
+                                </a>
+                            </div>
+                            <h4 class="font-bold text-gray-800 text-lg flex items-center gap-2">
+                                ${loc.title}
+                            </h4>
+                            <p class="text-sm text-gray-500 mt-1">${loc.desc}</p>
+                        </div>
+                    </div>
+                `;
+                timelineContainer.insertAdjacentHTML('beforeend', html);
+            });
+        }
+
+        // --- 6. HELPERS ---
+        function getIconByType(type) {
+            switch(type) {
+                case 'food': return 'fa-utensils';
+                case 'stay': return 'fa-bed';
+                case 'transport': return 'fa-plane';
+                case 'culture': return 'fa-gopuram';
+                case 'shopping': return 'fa-bag-shopping';
+                default: return 'fa-location-dot';
+            }
+        }
+
+        function renderTips() {
+            const container = document.getElementById('tips-list');
+            travelData.tips.forEach(tip => {
+                container.insertAdjacentHTML('beforeend', `
+                    <div class="bg-white p-4 rounded-xl shadow-sm border-l-4 border-nanyang-500">
+                        <div class="flex items-center gap-3 mb-2">
+                            <i class="fa-solid ${tip.icon} text-xl text-nanyang-500"></i>
+                            <h4 class="font-bold text-gray-800">${tip.title}</h4>
+                        </div>
+                        <p class="text-sm text-gray-600">${tip.desc}</p>
+                    </div>
+                `);
+            });
+        }
+    </script>
+</body>
+</html>
