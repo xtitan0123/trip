@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>2026 冰島環島究極攻略 | 15 Days</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Leaflet CSS & JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Google Fonts (Inter & Noto Sans TC) -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'Noto Sans TC', 'sans-serif'],
+                    },
+                    colors: {
+                        ice: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            500: '#0ea5e9',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                        },
+                        lava: {
+                            500: '#ef4444',
+                            900: '#7f1d1d'
+                        },
+                        moss: {
+                            500: '#10b981',
+                            800: '#064e3b'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1; 
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; 
+        }
+
+        /* Map Container Height */
+        #map {
+            height: 100%;
+            width: 100%;
+            z-index: 10;
+        }
+
+        /* Smooth Scrolling */
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        .sticky-header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(8px);
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans h-screen flex flex-col overflow-hidden">
+
+    <!-- DATA SOURCE: EDIT THIS OBJECT TO UPDATE ITINERARY -->
+    <script>
+        const travelData = [
+            {
+                day: 1,
+                date: "6/18",
+                title: "抵達與基底物資大採買",
+                desc: "建立自煮基礎，第一天買齊重物。Costco 全島最便宜。",
+                supply: "Costco / Bónus (Garðabær)",
+                supply_note: "買：油鹽、米麵、水、根莖類、吐司、酒(Vínbúðin)。",
+                tips: "市區禁飛空拍機。下車請抓緊門把。",
+                intensity: 2, // 1-5 Scale
+                driving_km: 50,
+                stay: "Reykjavík",
+                locations: [
+                    { name: "KEF 機場", lat: 63.9868, lng: -22.6280, type: "transport", note: "07:50 抵達 / 取車", search_query: "Keflavík Airport" },
+                    { name: "Costco Iceland", lat: 64.0862, lng: -21.9382, type: "shop", note: "大宗物資採買 (Garðabær)", search_query: "Costco Wholesale Iceland" },
+                    { name: "Sky Lagoon", lat: 64.1164, lng: -21.9489, type: "leisure", note: "下午泡湯放鬆", search_query: "Sky Lagoon" },
+                    { name: "Bæjarins Beztu Pylsur", lat: 64.1494, lng: -21.9366, type: "food", note: "必吃熱狗", search_query: "Bæjarins Beztu Pylsur" },
+                    { name: "Reykjavík 市區", lat: 64.1466, lng: -21.9426, type: "stay", note: "住宿", search_query: "Reykjavík" }
+                ]
+            },
+            {
+                day: 2,
+                date: "6/19",
+                title: "黃金圈與生鮮初補",
+                desc: "經典黃金圈路線，進入南岸前最後生鮮補給。",
+                supply: "Selfoss (Krónan)",
+                supply_note: "進入南岸最後大型超市，補充生鮮。",
+                tips: "Kerið 火口湖可空拍 (需注意風)。",
+                intensity: 3,
+                driving_km: 180,
+                stay: "Selfoss / Hella",
+                locations: [
+                    { name: "Þingvellir (P1 Parking)", lat: 64.2559, lng: -21.1304, type: "sight", note: "國家公園 (Hakid 觀景台)", search_query: "Thingvellir P1 Parking" },
+                    { name: "Friðheimar", lat: 64.1776, lng: -20.4449, type: "food", note: "番茄農場午餐 (需預約)", search_query: "Friðheimar" },
+                    { name: "Geysir Center", lat: 64.3138, lng: -20.2996, type: "sight", note: "間歇泉遊客中心", search_query: "Geysir Center" },
+                    { name: "Gullfoss (Lower Parking)", lat: 64.3254, lng: -20.1290, type: "sight", note: "黃金瀑布 (下層停車場)", search_query: "Gullfoss Lower Parking" },
+                    { name: "Kerið", lat: 64.0412, lng: -20.8851, type: "sight", note: "火口湖 (可空拍)", search_query: "Kerid Crater" }
+                ]
+            },
+            {
+                day: 3,
+                date: "6/20",
+                title: "【F-road】高地橘色地熱區",
+                desc: "深入內陸高地，Kerlingarfjöll 地貌奇特。",
+                supply: "無 (吃昨天的庫存)",
+                supply_note: "自備便當",
+                tips: "路況 F347 極顛簸，空拍聖地。",
+                intensity: 4,
+                driving_km: 220,
+                stay: "Hella Area",
+                locations: [
+                    { name: "Hella", lat: 63.8346, lng: -20.4005, type: "start", note: "出發", search_query: "Hella, Iceland" },
+                    { name: "Kerlingarfjöll (Highland Base)", lat: 64.6835, lng: -19.3000, type: "sight", note: "基地/飯店 (午餐/休息)", search_query: "Highland Base – Kerlingarfjöll" },
+                    { name: "Hveradalir Parking", lat: 64.6472, lng: -19.2796, type: "hike", note: "地熱谷健行起點", search_query: "Hveradalir Geothermal Area" }
+                ]
+            },
+            {
+                day: 4,
+                date: "6/21",
+                title: "【F-road】Landmannalaugar 彩色火山",
+                desc: "冰島最著名的內陸景觀，多彩流紋岩山脈。",
+                supply: "無",
+                supply_note: "高地野餐",
+                tips: "走 F208 北段避開過河。空拍必去。",
+                intensity: 5,
+                driving_km: 200,
+                stay: "Hella / Vík",
+                locations: [
+                    { name: "Sigöldugljúfur", lat: 64.1566, lng: -19.1353, type: "sight", note: "淚水峽谷 (停車點)", search_query: "Sigöldugljúfur" },
+                    { name: "Bláhylur (Hnausapollur)", lat: 64.0526, lng: -19.0306, type: "sight", note: "火口湖觀景點", search_query: "Bláhylur" },
+                    { name: "Landmannalaugar", lat: 63.9912, lng: -19.0601, type: "sight", note: "彩色火山 (河前停車場)", search_query: "Landmannalaugar" }
+                ]
+            },
+            {
+                day: 5,
+                date: "6/22",
+                title: "南岸瀑布與海鸚",
+                desc: "經典南岸 1 號公路，瀑布與黑沙灘。",
+                supply: "Vík (Krónan)",
+                supply_note: "補充羊排、鮭魚、Skyr。",
+                tips: "黑沙灘風大危險，注意瘋狗浪。",
+                intensity: 3,
+                driving_km: 140,
+                stay: "Vík",
+                locations: [
+                    { name: "Seljalandsfoss", lat: 63.6156, lng: -19.9886, type: "sight", note: "水簾洞瀑布", search_query: "Seljalandsfoss" },
+                    { name: "Skógafoss", lat: 63.5321, lng: -19.5114, type: "sight", note: "彩虹瀑布", search_query: "Skógafoss" },
+                    { name: "Dyrhólaey Lighthouse", lat: 63.3996, lng: -19.1269, type: "sight", note: "燈塔觀景台 (看海鸚)", search_query: "Dyrhólaey Lighthouse" },
+                    { name: "Reynisfjara", lat: 63.4043, lng: -19.0451, type: "sight", note: "黑沙灘 (注意浪)", search_query: "Reynisfjara Beach" },
+                    { name: "Vík (Krónan)", lat: 63.4191, lng: -19.0064, type: "shop", note: "超市補給/晚餐", search_query: "Krónan Vík" }
+                ]
+            },
+            {
+                day: 6,
+                date: "6/23",
+                title: "冰川健行日",
+                desc: "Skaftafell 國家公園冰川健行體驗。",
+                supply: "無",
+                supply_note: "自煮晚餐",
+                tips: "冰川區絕對禁飛空拍機。羽毛峽谷可飛。",
+                intensity: 5,
+                driving_km: 150,
+                stay: "Hof / Glacier Lagoon Area",
+                locations: [
+                    { name: "Fjaðrárgljúfur", lat: 63.7713, lng: -18.1718, type: "sight", note: "羽毛峽谷停車場", search_query: "Fjaðrárgljúfur" },
+                    { name: "Skaftafell Visitor Centre", lat: 64.0163, lng: -16.9664, type: "activity", note: "冰川健行集合點", search_query: "Skaftafell Visitor Centre" }
+                ]
+            },
+            {
+                day: 7,
+                date: "6/24",
+                title: "秘境峽谷與冰河湖",
+                desc: "前往小眾秘境 Múlagljúfur 與經典冰河湖。",
+                supply: "Höfn (Netto)",
+                supply_note: "東部前最後海鮮補給。",
+                tips: "Múlagljúfur 必飛空拍 (需健行 3h)。",
+                intensity: 4,
+                driving_km: 130,
+                stay: "Höfn",
+                locations: [
+                    { name: "Múlagljúfur Parking", lat: 63.9929, lng: -16.4354, type: "hike", note: "秘境峽谷登山口 (碎石路)", search_query: "Múlagljúfur Canyon Parking" },
+                    { name: "Jökulsárlón", lat: 64.0480, lng: -16.1786, type: "sight", note: "傑古沙龍冰河湖", search_query: "Jökulsárlón" },
+                    { name: "Diamond Beach", lat: 64.0428, lng: -16.1824, type: "sight", note: "鑽石沙灘", search_query: "Diamond Beach" },
+                    { name: "Pakkhús Restaurant", lat: 64.2499, lng: -15.2024, type: "food", note: "龍蝦大餐 (Höfn)", search_query: "Pakkhús Restaurant" }
+                ]
+            },
+            {
+                day: 8,
+                date: "6/25",
+                title: "天空之鏡與峽灣公路",
+                desc: "東部峽灣景觀，前往白日夢冒險王小鎮。",
+                supply: "Egilsstaðir (Nettó/Bónus)",
+                supply_note: "東部最重要補給點。",
+                tips: "Vestrahorn 天空之鏡絕佳空拍點。",
+                intensity: 2,
+                driving_km: 250,
+                stay: "Seyðisfjörður",
+                locations: [
+                    { name: "Vestrahorn (Viking Cafe)", lat: 64.2546, lng: -14.9946, type: "sight", note: "蝙蝠山/天空之鏡 (收費閘口)", search_query: "Viking Cafe Vestrahorn" },
+                    { name: "Egilsstaðir", lat: 65.2638, lng: -14.3942, type: "shop", note: "物資補給", search_query: "Egilsstaðir" },
+                    { name: "Seyðisfjörður", lat: 65.2601, lng: -14.0103, type: "stay", note: "彩虹教堂小鎮", search_query: "Seyðisfjörður" }
+                ]
+            },
+            {
+                day: 9,
+                date: "6/26",
+                title: "幾何峽谷與外星地貌",
+                desc: "壯觀的玄武岩峽谷與米湖地熱區。",
+                supply: "無",
+                supply_note: "晚餐 Vogafjós 農場餐廳",
+                tips: "864 公路傷底盤請慢行。黛提瀑布禁飛。",
+                intensity: 3,
+                driving_km: 280,
+                stay: "Mývatn",
+                locations: [
+                    { name: "Stuðlagil (East Side Parking)", lat: 65.1879, lng: -15.2854, type: "hike", note: "東側 Klaustrusel 停車場 (可走下去)", search_query: "Stuðlagil Canyon (East side parking)" },
+                    { name: "Dettifoss (East - 864)", lat: 65.8191, lng: -16.3791, type: "sight", note: "魔鬼瀑布 (864側停車場)", search_query: "Dettifoss east side" },
+                    { name: "Hverir (Námafjall)", lat: 65.6417, lng: -16.8074, type: "sight", note: "地熱區", search_query: "Hverir" },
+                    { name: "Mývatn (Vogafjós)", lat: 65.6234, lng: -16.9202, type: "stay", note: "米湖住宿/餐廳", search_query: "Vogafjós Farm Resort" }
+                ]
+            },
+            {
+                day: 10,
+                date: "6/27",
+                title: "眾神瀑布與啤酒慶典",
+                desc: "舒緩的一天，參觀瀑布並體驗啤酒 SPA。",
+                supply: "Akureyri",
+                supply_note: "阿克雷里市區餐廳晚餐",
+                tips: "眾神瀑布可空拍。",
+                intensity: 2,
+                driving_km: 150,
+                stay: "Akureyri",
+                locations: [
+                    { name: "Goðafoss", lat: 65.6843, lng: -17.5485, type: "sight", note: "眾神瀑布", search_query: "Goðafoss Waterfall" },
+                    { name: "Bjórböðin", lat: 65.9526, lng: -18.5283, type: "leisure", note: "啤酒溫泉", search_query: "Bjórböðin" },
+                    { name: "Akureyri", lat: 65.6835, lng: -18.0878, type: "stay", note: "北部首都住宿", search_query: "Akureyri" }
+                ]
+            },
+            {
+                day: 11,
+                date: "6/28",
+                title: "北方補貨與海上犀牛",
+                desc: "前往西北海岸，觀看犀牛石與海豹。",
+                supply: "Akureyri (大補貨)",
+                supply_note: "務必補滿接下來 4 天肉類與鮮奶！",
+                tips: "711 公路為碎石路。犀牛石空拍極佳。",
+                intensity: 3,
+                driving_km: 220,
+                stay: "Hvammstangi",
+                locations: [
+                    { name: "Glerártorg Mall (Akureyri)", lat: 65.6953, lng: -18.1215, type: "shop", note: "最後大補給 (Bonus/Netto)", search_query: "Glerártorg" },
+                    { name: "Hvítserkur Parking", lat: 65.6062, lng: -20.6353, type: "sight", note: "犀牛石停車場", search_query: "Hvítserkur" },
+                    { name: "Illugastadir", lat: 65.6082, lng: -20.8764, type: "sight", note: "海豹觀測點", search_query: "Illugastadir seal watching" }
+                ]
+            },
+            {
+                day: 12,
+                date: "6/29",
+                title: "斯奈山半島：大橋與地標",
+                desc: "進入斯奈山半島，教會山是攝影熱點。",
+                supply: "無",
+                supply_note: "自煮",
+                tips: "跨海大橋線條感必拍。",
+                intensity: 2,
+                driving_km: 260,
+                stay: "Grundarfjörður",
+                locations: [
+                    { name: "Kolgrafarfjörður Viewpoint", lat: 64.9658, lng: -23.0882, type: "sight", note: "劍鞘灣跨海大橋觀景點", search_query: "Kolgrafarfjörður Viewpoint" },
+                    { name: "Kirkjufell Parking", lat: 64.9274, lng: -23.3070, type: "sight", note: "教堂山停車場", search_query: "Kirkjufell Parking" }
+                ]
+            },
+            {
+                day: 13,
+                date: "6/30",
+                title: "半島巡航與黑教堂",
+                desc: "斯奈山半島南側景點，返回雷克雅維克。",
+                supply: "無",
+                supply_note: "自煮",
+                tips: "黑教堂經典攝影點。",
+                intensity: 2,
+                driving_km: 230,
+                stay: "Reykjavík",
+                locations: [
+                    { name: "Búðakirkja", lat: 64.8218, lng: -23.3846, type: "sight", note: "黑教堂", search_query: "Búðakirkja" },
+                    { name: "Arnarstapi (Cliff View)", lat: 64.7663, lng: -23.6215, type: "sight", note: "海蝕洞/巨人石", search_query: "Arnarstapi Cliff View" },
+                    { name: "Reykjavík", lat: 64.1466, lng: -21.9426, type: "stay", note: "返回市區", search_query: "Reykjavík" }
+                ]
+            },
+            {
+                day: 14,
+                date: "7/01",
+                title: "雷克雅維克深度遊",
+                desc: "市區漫步、採買伴手禮與慶功宴。",
+                supply: "市區商店 / 66°North",
+                supply_note: "Grillmarkaðurinn 慶功大餐",
+                tips: "整理空拍素材。",
+                intensity: 1,
+                driving_km: 20,
+                stay: "Reykjavík",
+                locations: [
+                    { name: "Hallgrímskirkja", lat: 64.1417, lng: -21.9266, type: "sight", note: "哈爾格林姆大教堂", search_query: "Hallgrímskirkja" },
+                    { name: "Sun Voyager", lat: 64.1476, lng: -21.9223, type: "sight", note: "太陽航海者", search_query: "Sun Voyager" },
+                    { name: "Grillmarkaðurinn", lat: 64.1479, lng: -21.9378, type: "food", note: "慶功宴餐廳", search_query: "Grillmarkaðurinn" }
+                ]
+            },
+            {
+                day: 15,
+                date: "7/02",
+                title: "最後採買與賦歸",
+                desc: "拜訪兩大板塊橋，還車並搭機。",
+                supply: "機場免稅店",
+                supply_note: "搭機",
+                tips: "板塊橋可空拍。",
+                intensity: 1,
+                driving_km: 50,
+                stay: "Home",
+                locations: [
+                    { name: "Bridge Between Continents", lat: 63.8684, lng: -22.6755, type: "sight", note: "兩大板塊橋", search_query: "Bridge Between Continents" },
+                    { name: "KEF Car Rental Return", lat: 63.9966, lng: -22.6226, type: "transport", note: "還車 (一般租車區)", search_query: "Keflavík Airport Car Rental Return" },
+                    { name: "Keflavík Airport", lat: 63.9868, lng: -22.6280, type: "transport", note: "17:15 起飛", search_query: "Keflavík International Airport" }
+                ]
+            }
+        ];
+    </script>
+
+    <!-- App Container -->
+    <div id="app" class="flex flex-col h-full relative">
+        
+        <!-- Header -->
+        <header class="bg-ice-900 text-white pt-4 pb-2 px-6 shadow-lg z-50 flex-none">
+            <div class="flex justify-between items-center mb-2">
+                <div>
+                    <h1 class="text-xl md:text-2xl font-bold tracking-wide">ICELAND <span class="text-ice-500">2026</span></h1>
+                    <p class="text-xs text-ice-100 opacity-80 uppercase tracking-widest">Ultimate Road Trip • 15 Days</p>
+                </div>
+                <!-- Removed Stats Button -->
+            </div>
+            
+            <!-- Sticky Day Navigation -->
+            <div id="day-nav" class="flex space-x-3 overflow-x-auto pb-2 pt-2 scrollbar-hide text-sm">
+                <!-- JS will populate this -->
+            </div>
+        </header>
+
+        <!-- Main Content (Split View for Desktop, Toggle for Mobile) -->
+        <main class="flex-1 relative overflow-hidden flex flex-row">
+            
+            <!-- LIST VIEW (Left on desktop, Full on mobile) -->
+            <div id="list-view" class="w-full md:w-5/12 lg:w-4/12 h-full overflow-y-auto bg-slate-50 pb-20 relative z-20">
+                <div id="itinerary-list" class="p-4 space-y-6">
+                    <!-- JS will populate cards here -->
+                </div>
+                
+                <!-- Removed Charts Section -->
+
+                <!-- Footer spacer -->
+                <div class="h-10"></div>
+            </div>
+
+            <!-- MAP VIEW (Right on desktop, Hidden/Toggled on mobile) -->
+            <div id="map-view-container" class="absolute inset-0 z-10 md:static md:w-7/12 lg:w-8/12 md:block hidden bg-slate-200">
+                <div id="map"></div>
+            </div>
+
+        </main>
+
+        <!-- Mobile Floating Action Button (Toggle Map/List) -->
+        <button id="view-toggle" class="md:hidden fixed bottom-6 right-6 bg-ice-800 text-white p-4 rounded-full shadow-2xl z-50 hover:bg-ice-700 transition transform hover:scale-105 active:scale-95 flex items-center justify-center w-14 h-14">
+            <i class="fa-solid fa-map text-xl"></i>
+        </button>
+
+    </div>
+    
+    <script>
+        // --- State Management ---
+        let map;
+        let markers = [];
+        let polyline;
+        let currentView = 'list'; // 'list' or 'map' (Mobile only)
+        const isDesktop = window.innerWidth >= 768;
+
+        // --- Initialization ---
+        document.addEventListener('DOMContentLoaded', () => {
+            initDayNav();
+            initItineraryList();
+            initMap();
+            // Removed initCharts call
+            
+            // Handle Resize
+            window.addEventListener('resize', () => {
+                const newIsDesktop = window.innerWidth >= 768;
+                const mapContainer = document.getElementById('map-view-container');
+                if (newIsDesktop) {
+                    mapContainer.classList.remove('hidden');
+                    mapContainer.classList.add('block');
+                } else {
+                    if (currentView === 'list') {
+                        mapContainer.classList.add('hidden');
+                        mapContainer.classList.remove('block');
+                    }
+                }
+                setTimeout(() => map.invalidateSize(), 300);
+            });
+
+            // Handle Mobile Toggle
+            const toggleBtn = document.getElementById('view-toggle');
+            const listView = document.getElementById('list-view');
+            const mapViewContainer = document.getElementById('map-view-container');
+            const toggleIcon = toggleBtn.querySelector('i');
+
+            toggleBtn.addEventListener('click', () => {
+                if (currentView === 'list') {
+                    // Switch to Map
+                    listView.classList.add('hidden');
+                    mapViewContainer.classList.remove('hidden');
+                    mapViewContainer.classList.add('block');
+                    currentView = 'map';
+                    toggleIcon.classList.remove('fa-map');
+                    toggleIcon.classList.add('fa-list-ul');
+                    map.invalidateSize();
+                } else {
+                    // Switch to List
+                    listView.classList.remove('hidden');
+                    mapViewContainer.classList.add('hidden');
+                    mapViewContainer.classList.remove('block');
+                    currentView = 'list';
+                    toggleIcon.classList.remove('fa-list-ul');
+                    toggleIcon.classList.add('fa-map');
+                }
+            });
+        });
+
+        // --- Component: Day Navigation ---
+        function initDayNav() {
+            const nav = document.getElementById('day-nav');
+            travelData.forEach((day, index) => {
+                const btn = document.createElement('button');
+                btn.className = `day-btn whitespace-nowrap px-4 py-1.5 rounded-full text-xs font-medium transition-all duration-200 border border-ice-800/30 ${index === 0 ? 'bg-ice-500 text-white border-transparent shadow-md' : 'bg-ice-800/10 text-ice-100 hover:bg-ice-800/30'}`;
+                btn.innerText = `Day ${day.day}`;
+                btn.onclick = () => activateDay(index);
+                nav.appendChild(btn);
+            });
+        }
+
+        // --- Component: Itinerary List ---
+        function initItineraryList() {
+            const container = document.getElementById('itinerary-list');
+            
+            travelData.forEach((day, index) => {
+                const card = document.createElement('div');
+                card.id = `day-card-${index}`;
+                card.className = "bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden relative group transition-all hover:shadow-md";
+                
+                // Intensity Bar
+                const intensityColor = day.intensity >= 4 ? 'bg-lava-500' : (day.intensity === 3 ? 'bg-yellow-500' : 'bg-moss-500');
+                const intensityWidth = (day.intensity / 5) * 100;
+
+                // Supply Badge logic
+                let supplyBadge = '';
+                if(day.supply && day.supply !== '無' && day.supply !== '機場免稅店') {
+                    supplyBadge = `<div class="mt-3 flex items-start text-xs bg-amber-50 text-amber-800 p-2 rounded-lg border border-amber-100">
+                        <i class="fa-solid fa-cart-shopping mt-0.5 mr-2"></i>
+                        <div>
+                            <span class="font-bold block">補給點：${day.supply}</span>
+                            <span class="opacity-80">${day.supply_note}</span>
+                        </div>
+                    </div>`;
+                }
+
+                // Tips Badge
+                let tipsBadge = '';
+                if(day.tips) {
+                    const isWarning = day.tips.includes('禁飛') || day.tips.includes('風') || day.tips.includes('傷底盤');
+                    const tipColor = isWarning ? 'bg-rose-50 text-rose-800 border-rose-100' : 'bg-blue-50 text-blue-800 border-blue-100';
+                    const tipIcon = isWarning ? 'fa-triangle-exclamation' : 'fa-circle-info';
+                    tipsBadge = `<div class="mt-2 flex items-start text-xs ${tipColor} p-2 rounded-lg border">
+                        <i class="fa-solid ${tipIcon} mt-0.5 mr-2"></i>
+                        <span>${day.tips}</span>
+                    </div>`;
+                }
+
+                // Locations List with Numbers
+                const locsHtml = day.locations.map((loc, i) => {
+                    let icon = 'fa-location-dot';
+                    if(loc.type === 'shop') icon = 'fa-cart-shopping';
+                    if(loc.type === 'food') icon = 'fa-utensils';
+                    if(loc.type === 'stay') icon = 'fa-bed';
+                    if(loc.type === 'hike') icon = 'fa-person-hiking';
+                    if(loc.type === 'transport') icon = 'fa-plane';
+                    
+                    return `<li class="flex items-start text-sm text-slate-600 justify-between group/item">
+                        <div class="flex items-start">
+                            <div class="flex-none w-5 mt-0.5 mr-2 flex flex-col items-center">
+                                <div class="w-5 h-5 rounded-full bg-ice-100 text-ice-800 text-[10px] font-bold flex items-center justify-center border border-ice-200">${i + 1}</div>
+                            </div>
+                            <div>
+                                <span class="font-medium text-slate-800">${loc.name}</span>
+                                <span class="text-xs text-slate-400 block">${loc.note}</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-3 pl-2">
+                            <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(loc.search_query || loc.name)}" target="_blank" class="text-slate-300 hover:text-ice-500 transition-colors p-1" onclick="event.stopPropagation()" title="在 Google Maps 查看位置">
+                                <i class="fa-solid fa-map-location-dot"></i>
+                            </a>
+                        </div>
+                    </li>`;
+                }).join('');
+
+                card.innerHTML = `
+                    <div class="h-1 w-full bg-slate-100">
+                        <div class="h-full ${intensityColor}" style="width: ${intensityWidth}%"></div>
+                    </div>
+                    <div class="p-5 cursor-pointer" onclick="focusDayOnMap(${index})">
+                        <div class="flex justify-between items-start mb-2">
+                            <div>
+                                <span class="text-xs font-bold text-ice-500 tracking-wider uppercase">Day ${day.day} • ${day.date}</span>
+                                <h2 class="text-lg font-bold text-slate-800 leading-tight mt-1">${day.title}</h2>
+                            </div>
+                            <span class="text-xs font-mono bg-slate-100 px-2 py-1 rounded text-slate-500 whitespace-nowrap">
+                                <i class="fa-solid fa-road mr-1"></i>${day.driving_km}km
+                            </span>
+                        </div>
+                        <p class="text-sm text-slate-500 mb-4 leading-relaxed">${day.desc}</p>
+                        
+                        <ul class="space-y-3 mb-4 border-l-2 border-slate-100 pl-3">
+                            ${locsHtml}
+                        </ul>
+
+                        ${supplyBadge}
+                        ${tipsBadge}
+                        
+                        <div class="mt-4 pt-3 border-t border-slate-50 flex justify-between items-center text-xs text-slate-400">
+                           <span><i class="fa-solid fa-bed mr-1"></i> ${day.stay}</span>
+                           <button class="text-ice-600 font-medium hover:underline" onclick="event.stopPropagation(); focusDayOnMap(${index})">在地圖查看 &rarr;</button>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // --- Core: Map Logic ---
+        function initMap() {
+            // Default center: Iceland
+            map = L.map('map', {
+                zoomControl: false,
+                attributionControl: false
+            }).setView([64.9631, -19.0208], 6);
+
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+                maxZoom: 19,
+                subdomains: 'abcd'
+            }).addTo(map);
+
+            L.control.zoom({ position: 'topright' }).addTo(map);
+
+            // Initial render: Show Day 1
+            renderDayOnMap(0);
+        }
+
+        function focusDayOnMap(index) {
+            activateDay(index);
+            // If on mobile, switch to map view automatically
+            if (!isDesktop && currentView === 'list') {
+                document.getElementById('view-toggle').click();
+            }
+        }
+
+        function renderDayOnMap(index) {
+            // Clear existing layers
+            markers.forEach(m => map.removeLayer(m));
+            markers = [];
+            if (polyline) map.removeLayer(polyline);
+
+            const day = travelData[index];
+            const latlngs = [];
+
+            const bounds = L.latLngBounds();
+
+            day.locations.forEach((loc, i) => { // Added index 'i'
+                const ll = [loc.lat, loc.lng];
+                latlngs.push(ll);
+                bounds.extend(ll);
+
+                // Icon Customization based on type
+                let iconColor = '#0ea5e9'; // ice-500
+                if(loc.type === 'shop') iconColor = '#f59e0b'; // amber
+                if(loc.type === 'stay') iconColor = '#0f172a'; // slate-900
+                if(loc.type === 'hike') iconColor = '#ef4444'; // red
+
+                const customIcon = L.divIcon({
+                    className: 'custom-div-icon',
+                    // Updated HTML to include the number i + 1
+                    html: `<div style="background-color: ${iconColor}" class="w-6 h-6 rounded-full border-2 border-white shadow-md flex items-center justify-center text-white text-[10px] font-bold">${i + 1}</div>`,
+                    iconSize: [24, 24],
+                    iconAnchor: [12, 12]
+                });
+
+                const marker = L.marker(ll, { icon: customIcon })
+                    .bindPopup(`
+                        <div class="font-sans min-w-[160px]">
+                            <h3 class="font-bold text-sm mb-1"><span class="bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded text-xs mr-1">${i + 1}</span>${loc.name}</h3>
+                            <p class="text-xs text-slate-500 mb-2">${loc.note}</p>
+                            <div class="flex space-x-2 mt-2">
+                                <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(loc.search_query || loc.name)}" target="_blank" class="flex-1 text-center bg-white text-slate-600 text-xs py-1.5 rounded border border-slate-200 hover:bg-slate-50 font-medium no-underline transition-colors">
+                                    <i class="fa-solid fa-map-location-dot mr-1"></i>地圖
+                                </a>
+                            </div>
+                        </div>
+                    `)
+                    .addTo(map);
+                markers.push(marker);
+            });
+
+            // Draw Route
+            if (latlngs.length > 1) {
+                polyline = L.polyline(latlngs, {
+                    color: '#075985', // ice-800
+                    weight: 4,
+                    opacity: 0.7,
+                    dashArray: '10, 10',
+                    lineCap: 'round'
+                }).addTo(map);
+            }
+
+            // Fly to bounds with padding
+            map.flyToBounds(bounds, {
+                padding: [50, 50],
+                maxZoom: 12,
+                duration: 1.5
+            });
+        }
+
+        // --- Interaction Logic ---
+        function activateDay(index) {
+            // Update Nav Buttons
+            const navBtns = document.querySelectorAll('.day-btn');
+            navBtns.forEach((btn, i) => {
+                if (i === index) {
+                    btn.className = 'day-btn whitespace-nowrap px-4 py-1.5 rounded-full text-xs font-medium transition-all duration-200 border border-transparent shadow-md bg-ice-500 text-white transform scale-105';
+                    btn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                } else {
+                    btn.className = 'day-btn whitespace-nowrap px-4 py-1.5 rounded-full text-xs font-medium transition-all duration-200 border border-ice-800/30 bg-ice-800/10 text-ice-100 hover:bg-ice-800/30';
+                }
+            });
+
+            // Scroll List to Card
+            const card = document.getElementById(`day-card-${index}`);
+            if (card) {
+                card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                
+                // Highlight Card
+                document.querySelectorAll('[id^="day-card-"]').forEach(c => {
+                    c.classList.remove('ring-2', 'ring-ice-400');
+                });
+                card.classList.add('ring-2', 'ring-ice-400');
+            }
+
+            // Update Map
+            renderDayOnMap(index);
+        }
+
+    </script>
+</body>
+</html>
