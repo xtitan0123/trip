@@ -64,11 +64,11 @@
             background: #94a3b8; 
         }
 
-        /* Map Container Height */
+        /* Map Container */
         #map {
-            height: 100%;
             width: 100%;
-            z-index: 10;
+            height: 100%;
+            z-index: 0; /* Base level */
         }
 
         /* Smooth Scrolling */
@@ -80,11 +80,27 @@
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(8px);
         }
+
+        /* Timeline Connector Line */
+        .timeline-line::before {
+            content: '';
+            position: absolute;
+            top: 24px;
+            bottom: -16px;
+            left: 10px; /* Center of the 20px circle */
+            width: 2px;
+            background-color: #e2e8f0; /* slate-200 */
+            z-index: 0;
+        }
+        /* Hide line for last item */
+        .timeline-item:last-child .timeline-line::before {
+            display: none;
+        }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans h-screen flex flex-col overflow-hidden">
 
-    <!-- DATA SOURCE: EDIT THIS OBJECT TO UPDATE ITINERARY -->
+    <!-- DATA SOURCE -->
     <script>
         const travelData = [
             {
@@ -95,7 +111,7 @@
                 supply: "Costco / Bónus (Garðabær)",
                 supply_note: "買：油鹽、米麵、水、根莖類、吐司、酒(Vínbúðin)。",
                 tips: "市區禁飛空拍機。下車請抓緊門把。",
-                intensity: 2, // 1-5 Scale
+                intensity: 2, 
                 driving_km: 50,
                 stay: "Reykjavík",
                 locations: [
@@ -361,7 +377,6 @@
                     <h1 class="text-xl md:text-2xl font-bold tracking-wide">ICELAND <span class="text-ice-500">2026</span></h1>
                     <p class="text-xs text-ice-100 opacity-80 uppercase tracking-widest">Ultimate Road Trip • 15 Days</p>
                 </div>
-                <!-- Removed Stats Button -->
             </div>
             
             <!-- Sticky Day Navigation -->
@@ -370,32 +385,24 @@
             </div>
         </header>
 
-        <!-- Main Content (Split View for Desktop, Toggle for Mobile) -->
-        <main class="flex-1 relative overflow-hidden flex flex-row">
+        <!-- Main Content (Split View: Map Top, List Bottom on Mobile) -->
+        <main class="flex-1 relative overflow-hidden flex flex-col md:flex-row bg-slate-100">
             
-            <!-- LIST VIEW (Left on desktop, Full on mobile) -->
-            <div id="list-view" class="w-full md:w-5/12 lg:w-4/12 h-full overflow-y-auto bg-slate-50 pb-20 relative z-20">
-                <div id="itinerary-list" class="p-4 space-y-6">
-                    <!-- JS will populate cards here -->
-                </div>
-                
-                <!-- Removed Charts Section -->
-
-                <!-- Footer spacer -->
-                <div class="h-10"></div>
-            </div>
-
-            <!-- MAP VIEW (Right on desktop, Hidden/Toggled on mobile) -->
-            <div id="map-view-container" class="absolute inset-0 z-10 md:static md:w-7/12 lg:w-8/12 md:block hidden bg-slate-200">
+            <!-- MAP VIEW -->
+            <!-- Mobile: Top 40% fixed height. Desktop: Right 60% full height -->
+            <div id="map-view-container" class="h-[40vh] w-full flex-none md:h-full md:w-7/12 lg:w-8/12 md:order-2 bg-slate-200 relative shadow-md md:shadow-none z-10">
                 <div id="map"></div>
             </div>
 
-        </main>
+            <!-- LIST VIEW -->
+            <!-- Mobile: Remaining height (flex-1). Desktop: Left 40% full height -->
+            <div id="list-view" class="flex-1 w-full md:w-5/12 lg:w-4/12 md:order-1 overflow-y-auto bg-slate-50 relative z-20">
+                <div id="itinerary-list" class="p-4 space-y-6 pb-24 md:pb-10">
+                    <!-- JS will populate cards here -->
+                </div>
+            </div>
 
-        <!-- Mobile Floating Action Button (Toggle Map/List) -->
-        <button id="view-toggle" class="md:hidden fixed bottom-6 right-6 bg-ice-800 text-white p-4 rounded-full shadow-2xl z-50 hover:bg-ice-700 transition transform hover:scale-105 active:scale-95 flex items-center justify-center w-14 h-14">
-            <i class="fa-solid fa-map text-xl"></i>
-        </button>
+        </main>
 
     </div>
     
@@ -404,57 +411,17 @@
         let map;
         let markers = [];
         let polyline;
-        let currentView = 'list'; // 'list' or 'map' (Mobile only)
-        const isDesktop = window.innerWidth >= 768;
+        // removed currentView logic as we use split view now
 
         // --- Initialization ---
         document.addEventListener('DOMContentLoaded', () => {
             initDayNav();
             initItineraryList();
             initMap();
-            // Removed initCharts call
             
-            // Handle Resize
+            // Handle Resize to fix map tiles
             window.addEventListener('resize', () => {
-                const newIsDesktop = window.innerWidth >= 768;
-                const mapContainer = document.getElementById('map-view-container');
-                if (newIsDesktop) {
-                    mapContainer.classList.remove('hidden');
-                    mapContainer.classList.add('block');
-                } else {
-                    if (currentView === 'list') {
-                        mapContainer.classList.add('hidden');
-                        mapContainer.classList.remove('block');
-                    }
-                }
                 setTimeout(() => map.invalidateSize(), 300);
-            });
-
-            // Handle Mobile Toggle
-            const toggleBtn = document.getElementById('view-toggle');
-            const listView = document.getElementById('list-view');
-            const mapViewContainer = document.getElementById('map-view-container');
-            const toggleIcon = toggleBtn.querySelector('i');
-
-            toggleBtn.addEventListener('click', () => {
-                if (currentView === 'list') {
-                    // Switch to Map
-                    listView.classList.add('hidden');
-                    mapViewContainer.classList.remove('hidden');
-                    mapViewContainer.classList.add('block');
-                    currentView = 'map';
-                    toggleIcon.classList.remove('fa-map');
-                    toggleIcon.classList.add('fa-list-ul');
-                    map.invalidateSize();
-                } else {
-                    // Switch to List
-                    listView.classList.remove('hidden');
-                    mapViewContainer.classList.add('hidden');
-                    mapViewContainer.classList.remove('block');
-                    currentView = 'list';
-                    toggleIcon.classList.remove('fa-list-ul');
-                    toggleIcon.classList.add('fa-map');
-                }
             });
         });
 
@@ -507,28 +474,23 @@
                     </div>`;
                 }
 
-                // Locations List with Numbers
+                // Locations List with Numbers (Timeline Style)
                 const locsHtml = day.locations.map((loc, i) => {
                     let icon = 'fa-location-dot';
-                    if(loc.type === 'shop') icon = 'fa-cart-shopping';
-                    if(loc.type === 'food') icon = 'fa-utensils';
-                    if(loc.type === 'stay') icon = 'fa-bed';
-                    if(loc.type === 'hike') icon = 'fa-person-hiking';
-                    if(loc.type === 'transport') icon = 'fa-plane';
                     
-                    return `<li class="flex items-start text-sm text-slate-600 justify-between group/item">
-                        <div class="flex items-start">
-                            <div class="flex-none w-5 mt-0.5 mr-2 flex flex-col items-center">
-                                <div class="w-5 h-5 rounded-full bg-ice-100 text-ice-800 text-[10px] font-bold flex items-center justify-center border border-ice-200">${i + 1}</div>
+                    return `<li class="timeline-item flex items-start text-sm text-slate-600 justify-between group/item relative timeline-line">
+                        <div class="flex items-start flex-1">
+                            <div class="flex-none w-10 flex flex-col items-center relative z-10">
+                                <div class="w-5 h-5 rounded-full bg-ice-100 text-ice-800 text-[10px] font-bold flex items-center justify-center border border-ice-200 mt-0.5 transition-colors group-hover/item:bg-ice-500 group-hover/item:text-white group-hover/item:border-ice-500 shadow-sm">${i + 1}</div>
                             </div>
-                            <div>
-                                <span class="font-medium text-slate-800">${loc.name}</span>
-                                <span class="text-xs text-slate-400 block">${loc.note}</span>
+                            <div class="pb-5">
+                                <span class="font-medium text-slate-800 block">${loc.name}</span>
+                                <span class="text-xs text-slate-400 block mt-0.5 leading-relaxed">${loc.note}</span>
                             </div>
                         </div>
-                        <div class="flex items-center space-x-3 pl-2">
-                            <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(loc.search_query || loc.name)}" target="_blank" class="text-slate-300 hover:text-ice-500 transition-colors p-1" onclick="event.stopPropagation()" title="在 Google Maps 查看位置">
-                                <i class="fa-solid fa-map-location-dot"></i>
+                        <div class="flex items-center space-x-1 pl-1 mt-0.5">
+                            <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(loc.search_query || loc.name)}" target="_blank" class="w-8 h-8 flex items-center justify-center rounded-full text-slate-300 hover:text-ice-600 hover:bg-ice-50 transition-all" onclick="event.stopPropagation()" title="在 Google Maps 查看">
+                                <i class="fa-solid fa-map-location-dot text-sm"></i>
                             </a>
                         </div>
                     </li>`;
@@ -542,7 +504,7 @@
                         <div class="flex justify-between items-start mb-2">
                             <div>
                                 <span class="text-xs font-bold text-ice-500 tracking-wider uppercase">Day ${day.day} • ${day.date}</span>
-                                <h2 class="text-lg font-bold text-slate-800 leading-tight mt-1">${day.title}</h2>
+                                <h2 class="text-lg font-bold text-slate-800 leading-tight mt-1 group-hover:text-ice-700 transition-colors">${day.title}</h2>
                             </div>
                             <span class="text-xs font-mono bg-slate-100 px-2 py-1 rounded text-slate-500 whitespace-nowrap">
                                 <i class="fa-solid fa-road mr-1"></i>${day.driving_km}km
@@ -550,7 +512,7 @@
                         </div>
                         <p class="text-sm text-slate-500 mb-4 leading-relaxed">${day.desc}</p>
                         
-                        <ul class="space-y-3 mb-4 border-l-2 border-slate-100 pl-3">
+                        <ul class="mb-4 pl-1">
                             ${locsHtml}
                         </ul>
 
@@ -559,7 +521,7 @@
                         
                         <div class="mt-4 pt-3 border-t border-slate-50 flex justify-between items-center text-xs text-slate-400">
                            <span><i class="fa-solid fa-bed mr-1"></i> ${day.stay}</span>
-                           <button class="text-ice-600 font-medium hover:underline" onclick="event.stopPropagation(); focusDayOnMap(${index})">在地圖查看 &rarr;</button>
+                           <span class="text-ice-600 font-medium group-hover:underline">定位此日 &rarr;</span>
                         </div>
                     </div>
                 `;
@@ -588,9 +550,18 @@
 
         function focusDayOnMap(index) {
             activateDay(index);
-            // If on mobile, switch to map view automatically
-            if (!isDesktop && currentView === 'list') {
-                document.getElementById('view-toggle').click();
+            // Scroll to the specific card within the list container
+            const card = document.getElementById(`day-card-${index}`);
+            if (card) {
+                // Determine if we are on mobile (where list view has its own scroll) or desktop
+                const listView = document.getElementById('list-view');
+                const cardTop = card.offsetTop;
+                const containerHeight = listView.clientHeight;
+                
+                listView.scrollTo({
+                    top: cardTop - 20, // Add some padding
+                    behavior: 'smooth'
+                });
             }
         }
 
@@ -605,7 +576,7 @@
 
             const bounds = L.latLngBounds();
 
-            day.locations.forEach((loc, i) => { // Added index 'i'
+            day.locations.forEach((loc, i) => { 
                 const ll = [loc.lat, loc.lng];
                 latlngs.push(ll);
                 bounds.extend(ll);
@@ -618,10 +589,10 @@
 
                 const customIcon = L.divIcon({
                     className: 'custom-div-icon',
-                    // Updated HTML to include the number i + 1
-                    html: `<div style="background-color: ${iconColor}" class="w-6 h-6 rounded-full border-2 border-white shadow-md flex items-center justify-center text-white text-[10px] font-bold">${i + 1}</div>`,
-                    iconSize: [24, 24],
-                    iconAnchor: [12, 12]
+                    html: `<div style="background-color: ${iconColor}" class="w-8 h-8 rounded-full border-2 border-white shadow-lg flex items-center justify-center text-white text-xs font-bold transform transition-transform hover:scale-110">${i + 1}</div>`,
+                    iconSize: [32, 32],
+                    iconAnchor: [16, 16],
+                    popupAnchor: [0, -10]
                 });
 
                 const marker = L.marker(ll, { icon: customIcon })
@@ -630,8 +601,8 @@
                             <h3 class="font-bold text-sm mb-1"><span class="bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded text-xs mr-1">${i + 1}</span>${loc.name}</h3>
                             <p class="text-xs text-slate-500 mb-2">${loc.note}</p>
                             <div class="flex space-x-2 mt-2">
-                                <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(loc.search_query || loc.name)}" target="_blank" class="flex-1 text-center bg-white text-slate-600 text-xs py-1.5 rounded border border-slate-200 hover:bg-slate-50 font-medium no-underline transition-colors">
-                                    <i class="fa-solid fa-map-location-dot mr-1"></i>地圖
+                                <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(loc.search_query || loc.name)}" target="_blank" class="flex-1 text-center bg-white text-slate-600 text-xs py-1.5 rounded border border-slate-200 hover:bg-slate-50 font-medium no-underline transition-colors shadow-sm">
+                                    <i class="fa-solid fa-map-location-dot mr-1 text-ice-600"></i>開啟地圖
                                 </a>
                             </div>
                         </div>
@@ -645,7 +616,7 @@
                 polyline = L.polyline(latlngs, {
                     color: '#075985', // ice-800
                     weight: 4,
-                    opacity: 0.7,
+                    opacity: 0.8,
                     dashArray: '10, 10',
                     lineCap: 'round'
                 }).addTo(map);
@@ -672,17 +643,12 @@
                 }
             });
 
-            // Scroll List to Card
+            // Highlight Card
+            document.querySelectorAll('[id^="day-card-"]').forEach(c => {
+                c.classList.remove('ring-2', 'ring-ice-400');
+            });
             const card = document.getElementById(`day-card-${index}`);
-            if (card) {
-                card.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                
-                // Highlight Card
-                document.querySelectorAll('[id^="day-card-"]').forEach(c => {
-                    c.classList.remove('ring-2', 'ring-ice-400');
-                });
-                card.classList.add('ring-2', 'ring-ice-400');
-            }
+            if(card) card.classList.add('ring-2', 'ring-ice-400');
 
             // Update Map
             renderDayOnMap(index);
