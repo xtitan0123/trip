@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>2026 冰島 15 天環島之旅</title>
     
     <!-- Tailwind CSS -->
@@ -83,23 +83,24 @@
         /* Layout Handling */
         #app-container {
             display: flex;
-            height: 100vh;
+            height: 100vh;      /* Fallback */
+            height: 100dvh;     /* Dynamic Viewport Height for Mobile */
             width: 100vw;
         }
         
         /* Mobile Layout (Default) */
         @media (max-width: 1023px) {
             #app-container { flex-direction: column; }
-            #map-container { height: 35vh; width: 100%; order: 1; z-index: 50; }
-            #list-container { height: 65vh; width: 100%; order: 2; }
+            #map-container { height: 35vh; height: 35dvh; width: 100%; order: 1; z-index: 50; }
+            #list-container { height: 65vh; height: 65dvh; width: 100%; order: 2; }
             .transport-line { height: 40px; border-left: 2px dashed #CBD5E1; margin-left: 1.2rem; }
         }
         
         /* Desktop Layout */
         @media (min-width: 1024px) {
             #app-container { flex-direction: row; }
-            #list-container { width: 35%; height: 100vh; order: 1; border-right: 1px solid #e2e8f0; }
-            #map-container { width: 65%; height: 100vh; order: 2; }
+            #list-container { width: 35%; height: 100vh; height: 100dvh; order: 1; border-right: 1px solid #e2e8f0; }
+            #map-container { width: 65%; height: 100vh; height: 100dvh; order: 2; }
             .transport-line { height: 40px; border-left: 2px dashed #CBD5E1; margin-left: 1.2rem; }
         }
     </style>
@@ -401,6 +402,7 @@
 
         let currentLayerGroup = L.layerGroup().addTo(map);
         let activeMarker = null;
+        let currentDayIndex = -1; // Track current day to prevent redundant updates
 
         // 2. Render Functions
         const contentDiv = document.getElementById('itinerary-content');
@@ -495,6 +497,10 @@
 
         // 3. Map Update Logic
         function updateMap(dayIndex) {
+            // Prevent redundant updates
+            if (currentDayIndex === dayIndex) return;
+            currentDayIndex = dayIndex;
+
             currentLayerGroup.clearLayers();
             const data = travelData[dayIndex];
             const latlngs = [];
@@ -545,7 +551,10 @@
 
         // 4. Interactions
         
-        // A. Intersection Observer for Scroll
+        // A. Intersection Observer for Scroll (Revised for Mobile)
+        // RootMargin explanation: 
+        // '-10% 0px -70% 0px' creates a narrow "active" band near the top of the container.
+        // It triggers when an element enters the area between 10% and 30% from the top.
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
@@ -555,7 +564,8 @@
             });
         }, {
             root: document.getElementById('list-container'),
-            threshold: 0.5 // Trigger when 50% of the day section is visible
+            rootMargin: '-10% 0px -70% 0px', // Focus on top area of viewport
+            threshold: 0 // Trigger as soon as one pixel enters the margin
         });
 
         document.querySelectorAll('.day-section').forEach(section => {
