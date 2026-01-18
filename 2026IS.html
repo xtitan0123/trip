@@ -76,7 +76,6 @@
             background-color: #E76F51; /* Accent Color */
             transform: scale(1.25);
             box-shadow: 0 6px 12px rgba(0,0,0,0.4);
-            z-index: 999;
             border-color: #fff;
         }
         
@@ -575,16 +574,33 @@
         // B. Hover/Click on List Items
         document.querySelectorAll('.location-card').forEach(card => {
             const handleInteract = () => {
-                const lat = card.dataset.lat;
-                const lng = card.dataset.lng;
+                const lat = parseFloat(card.dataset.lat);
+                const lng = parseFloat(card.dataset.lng);
                 
-                // Highlight temporary marker logic could go here
-                // Simple version: Pan to it
-                map.panTo([lat, lng]);
+                // Highlight marker on map
+                currentLayerGroup.eachLayer(layer => {
+                    const elem = layer.getElement();
+                    if (elem) {
+                        const mLat = layer.getLatLng().lat;
+                        const mLng = layer.getLatLng().lng;
+                        
+                        // Compare floats with epsilon
+                        if (Math.abs(mLat - lat) < 0.0001 && Math.abs(mLng - lng) < 0.0001) {
+                            elem.classList.add('marker-active');
+                            layer.setZIndexOffset(1000); // Bring to front
+                        } else {
+                            elem.classList.remove('marker-active');
+                            layer.setZIndexOffset(0);
+                        }
+                    }
+                });
             };
 
             card.addEventListener('mouseenter', handleInteract);
-            card.addEventListener('click', handleInteract);
+            card.addEventListener('click', () => {
+                handleInteract();
+                map.flyTo([card.dataset.lat, card.dataset.lng], 14); // Zoom to location
+            });
         });
 
         // Initial Load
