@@ -27,7 +27,8 @@
                             blue: '#4A6FA5',  // 冰川藍
                             dark: '#2C3E50',  // 火山岩
                             sand: '#E6E2D3',  // 沙灘
-                            accent: '#E76F51' // 標記紅
+                            accent: '#E76F51', // 標記紅
+                            green: '#2A9D8F'  // 安全綠
                         }
                     },
                     fontFamily: {
@@ -77,6 +78,7 @@
             transform: scale(1.25);
             box-shadow: 0 6px 12px rgba(0,0,0,0.4);
             border-color: #fff;
+            z-index: 9999;
         }
         
         /* Layout Handling */
@@ -117,52 +119,59 @@
                 date: "6/18",
                 title: "抵達與基底物資大採買",
                 summary: "建立自煮基礎，第一天買齊重物。",
-                start: { name: "台灣", coords: null }, // Day 1 特例
-                end: { name: "Reykjavík", coords: [64.1466, -21.9426] },
+                drive: { dist: "50 km", time: "50 min", route: "41 號公路" },
                 tips: [
-                    { type: "shopping", text: "Costco/Bónus 必買：油、鹽、水、米、洋蔥、馬鈴薯。" },
-                    { type: "drone", text: "市區全面禁飛 (No Drone Zone)。" }
+                    { type: "car", text: "取車重點：務必加購碎石險 (GP) 與沙礫險 (SAAP)。" },
+                    { type: "car", text: "檢查車底狀況與輪胎，確認四輪驅動功能正常。" },
+                    { type: "shopping", text: "Costco/Bónus：油、鹽、黑胡椒、米/義大利麵、大量瓶裝水、大袋洋蔥/馬鈴薯、吐司、長效鮮奶。" },
+                    { type: "safety", text: "市區全面禁飛 (No Drone Zone)。Sky Lagoon 為私有地禁飛。" }
                 ],
                 locations: [
-                    { name: "Keflavík International Airport", mapName: "Keflavík International Airport", coords: [63.9868, -22.6280], type: "airport", desc: "07:50 抵達，取車。", icon: "fa-plane" },
-                    { name: "Costco / Bónus", mapName: "Costco Wholesale Iceland", coords: [64.0817, -21.9317], type: "shopping", desc: "第一階段補給：基底物資。", icon: "fa-cart-shopping" },
-                    { name: "Sky Lagoon", mapName: "Sky Lagoon", coords: [64.1147, -21.9547], type: "activity", desc: "下午放鬆泡湯，消除飛行疲勞。", icon: "fa-water" },
-                    { name: "Reykjavík Accommodation", mapName: "Reykjavík", coords: [64.1466, -21.9426], type: "stay", desc: "首府住宿，整理物資。", icon: "fa-bed" }
+                    { name: "Keflavík Airport", mapName: "Keflavík International Airport", coords: [63.9868, -22.6280], type: "airport", desc: "07:50 抵達，10:30 前取車完畢。", icon: "fa-plane", droneTag: "forbidden" },
+                    { name: "Costco / Bónus", mapName: "Costco Wholesale Iceland", coords: [64.0817, -21.9317], type: "shopping", desc: "第一階段補給：基底物資。", icon: "fa-cart-shopping", droneTag: "forbidden" },
+                    { name: "Bæjarins Beztu Pylsur", mapName: "Bæjarins Beztu Pylsur", coords: [64.1484, -21.9366], type: "food", desc: "午餐：著名的羊肉熱狗。", icon: "fa-hotdog", droneTag: "forbidden" },
+                    { name: "Sky Lagoon", mapName: "Sky Lagoon", coords: [64.1147, -21.9547], type: "activity", desc: "下午放鬆泡湯，消除飛行疲勞。", icon: "fa-water", droneTag: "forbidden" },
+                    { name: "Reykjavík", mapName: "Reykjavík", coords: [64.1466, -21.9426], type: "stay", desc: "首府住宿，整理物資。注意 Parka App 停車繳費。", icon: "fa-bed", droneTag: "forbidden" }
                 ]
             },
             {
                 day: 2,
                 date: "6/19",
-                title: "黃金圈與生鮮初補",
+                title: "黃金圈與地熱饗宴",
                 summary: "經典黃金圈路線，補充生鮮。",
+                drive: { dist: "200 km", time: "3 hr", route: "36 ➔ 35 ➔ 37" },
                 tips: [
-                    { type: "food", text: "Friðheimar 番茄農場需提前預約。" },
+                    { type: "food", text: "Friðheimar 番茄農場務必提前預約。" },
+                    { type: "drone", text: "辛格韋德利國家公園 (Thingvellir) 全面禁飛。" },
+                    { type: "drone", text: "Gullfoss 黃金瀑布水氣大且風強，建議謹慎或不飛。" },
                     { type: "shopping", text: "Selfoss (Krónan) 是進入南岸前最後大超市。" }
                 ],
                 locations: [
-                    { name: "Reykjavík (Start)", mapName: "Reykjavík", coords: [64.1466, -21.9426], type: "start", desc: "早晨出發", icon: "fa-car" },
-                    { name: "Þingvellir National Park", mapName: "Thingvellir National Park", coords: [64.2559, -21.1295], type: "sight", desc: "議會國家公園，板塊裂縫。", icon: "fa-mountain" },
-                    { name: "Friðheimar", mapName: "Friðheimar", coords: [64.1776, -20.4468], type: "food", desc: "溫室番茄湯午餐。", icon: "fa-utensils" },
-                    { name: "Geysir", mapName: "Geysir", coords: [64.3104, -20.3024], type: "sight", desc: "間歇泉噴發。", icon: "fa-volcano" },
-                    { name: "Gullfoss", mapName: "Gullfoss Falls", coords: [64.3271, -20.1199], type: "sight", desc: "黃金瀑布。", icon: "fa-water" },
-                    { name: "Kerið", mapName: "Kerid Crater", coords: [64.0413, -20.8851], type: "sight", desc: "火口湖 (可空拍 🚁)。", icon: "fa-camera" },
-                    { name: "Selfoss (Krónan)", mapName: "Krónan Selfoss", coords: [63.9377, -21.0024], type: "shopping", desc: "生鮮補給點。", icon: "fa-cart-shopping" },
-                    { name: "Selfoss / Hella Accommodation", mapName: "Hella, Iceland", coords: [63.8346, -20.3986], type: "stay", desc: "住宿 (Hella 周邊)。", icon: "fa-bed" }
+                    { name: "Reykjavík (Start)", mapName: "Reykjavík", coords: [64.1466, -21.9426], type: "start", desc: "09:00 前出發。", icon: "fa-car", droneTag: "forbidden" },
+                    { name: "Þingvellir National Park", mapName: "Thingvellir National Park", coords: [64.2559, -21.1295], type: "sight", desc: "議會國家公園，板塊裂縫。", icon: "fa-mountain", droneTag: "forbidden" },
+                    { name: "Friðheimar", mapName: "Friðheimar", coords: [64.1776, -20.4468], type: "food", desc: "溫室番茄湯午餐 (預約制)。", icon: "fa-utensils", droneTag: "forbidden" },
+                    { name: "Geysir", mapName: "Geysir", coords: [64.3104, -20.3024], type: "sight", desc: "間歇泉噴發。", icon: "fa-volcano", droneTag: "allowed" },
+                    { name: "Gullfoss", mapName: "Gullfoss Falls", coords: [64.3271, -20.1199], type: "sight", desc: "黃金瀑布。", icon: "fa-water", droneTag: "forbidden" },
+                    { name: "Kerið", mapName: "Kerid Crater", coords: [64.0413, -20.8851], type: "sight", desc: "火口湖。", icon: "fa-camera", droneTag: "allowed" },
+                    { name: "Selfoss", mapName: "Selfoss", coords: [63.9377, -21.0024], type: "stay", desc: "住宿 Selfoss 或 Hella。", icon: "fa-bed", droneTag: "allowed" }
                 ]
             },
             {
                 day: 3,
                 date: "6/20",
-                title: "F-road I: 高地橘色地熱",
+                title: "F-road I: 高地橘色世界",
                 summary: "挑戰內陸高地 Kerlingarfjöll。",
+                drive: { dist: "280 km", time: "4.5 hr", route: "35 ➔ F347" },
                 tips: [
-                    { type: "drive", text: "路況極顛簸 (35 -> F347)，請專注駕駛。" },
-                    { type: "drone", text: "Hveradalir 為空拍聖地 🚁🚁。" }
+                    { type: "drive", text: "路況：35 號公路轉 F347。F347 極顛簸，需切換 4WD 低速檔。" },
+                    { type: "safety", text: "出發前務必在 SafeTravel.is 登錄行程。" },
+                    { type: "weather", text: "若風速 >15m/s 絕對禁止進入高地。" },
+                    { type: "drone", text: "Hveradalir 為空拍聖地，橘色山脈與白色蒸氣。" }
                 ],
                 locations: [
-                    { name: "Hella (Start)", mapName: "Hella, Iceland", coords: [63.8346, -20.3986], type: "start", desc: "前往中央高地", icon: "fa-car" },
-                    { name: "Kerlingarfjöll / Hveradalir", mapName: "Hveradalir Geothermal Area", coords: [64.6433, -19.2737], type: "sight", desc: "高地地熱區，如火星般的橘色地貌。", icon: "fa-fire" },
-                    { name: "Hella / Vík Area", mapName: "Hella, Iceland", coords: [63.8346, -20.3986], type: "stay", desc: "返回平地住宿。", icon: "fa-bed" }
+                    { name: "Selfoss/Hella (Start)", mapName: "Hella, Iceland", coords: [63.8346, -20.3986], type: "start", desc: "08:30 前出發，加滿油。", icon: "fa-car", droneTag: "allowed" },
+                    { name: "Hveradalir", mapName: "Hveradalir Geothermal Area", coords: [64.6433, -19.2737], type: "sight", desc: "橘色地熱區 (空拍聖地)。", icon: "fa-fire", droneTag: "must" },
+                    { name: "Hella / Vík Area", mapName: "Hella, Iceland", coords: [63.8346, -20.3986], type: "stay", desc: "返回平地住宿。", icon: "fa-bed", droneTag: "allowed" }
                 ]
             },
             {
@@ -170,35 +179,41 @@
                 date: "6/21",
                 title: "F-road II: 彩色火山",
                 summary: "Landmannalaugar 彩色火山與高地湖泊。",
+                drive: { dist: "230 km", time: "4 hr", route: "26 ➔ F208 北段" },
                 tips: [
-                    { type: "drive", text: "走 F208 北段可避開危險過河路段。" },
-                    { type: "drone", text: "絕對必飛的景色 🚁🚁。" }
+                    { type: "drive", text: "務必走 F208 北段 (此段無涉水)。嚴禁走 F208 南段 (有深水河流)。" },
+                    { type: "safety", text: "高地完全無手機訊號，務必下載離線地圖。" },
+                    { type: "car", text: "在 26 號公路交界處務必加滿油。" },
+                    { type: "drone", text: "空拍聖地，但需注意高地陣風，若 >10m/s 建議降落。" }
                 ],
                 locations: [
-                    { name: "Hella (Start)", mapName: "Hella, Iceland", coords: [63.8346, -20.3986], type: "start", desc: "再次進入高地", icon: "fa-car" },
-                    { name: "Sigöldugljúfur", mapName: "Sigöldugljúfur", coords: [64.1568, -19.1360], type: "sight", desc: "淚水峽谷，無數小瀑布。", icon: "fa-water" },
-                    { name: "Bláhylur", mapName: "Bláhylur", coords: [64.0373, -19.0435], type: "sight", desc: "絕美火口湖。", icon: "fa-camera" },
-                    { name: "Landmannalaugar", mapName: "Landmannalaugar", coords: [63.9904, -19.0601], type: "sight", desc: "彩色流紋岩山脈健行。", icon: "fa-mountain" },
-                    { name: "Vík Accommodation", mapName: "Vík í Mýrdal", coords: [63.4186, -19.0060], type: "stay", desc: "前往維克鎮住宿。", icon: "fa-bed" }
+                    { name: "Hella (Start)", mapName: "Hella, Iceland", coords: [63.8346, -20.3986], type: "start", desc: "08:30 出發。", icon: "fa-car", droneTag: "allowed" },
+                    { name: "Sigöldugljúfur", mapName: "Sigöldugljúfur", coords: [64.1568, -19.1360], type: "sight", desc: "淚水峽谷，無數小瀑布。", icon: "fa-water", droneTag: "allowed" },
+                    { name: "Bláhylur", mapName: "Bláhylur", coords: [64.0373, -19.0435], type: "sight", desc: "絕美火口湖。", icon: "fa-camera", droneTag: "allowed" },
+                    { name: "Landmannalaugar", mapName: "Landmannalaugar", coords: [63.9904, -19.0601], type: "sight", desc: "彩色流紋岩山脈健行。", icon: "fa-mountain", droneTag: "must" },
+                    { name: "Vík", mapName: "Vík í Mýrdal", coords: [63.4186, -19.0060], type: "stay", desc: "住宿 Vík 或周邊。", icon: "fa-bed", droneTag: "allowed" }
                 ]
             },
             {
                 day: 5,
                 date: "6/22",
-                title: "南岸瀑布與海鸚",
+                title: "南岸經典與海鸚",
                 summary: "經典南岸 1 號公路景點。",
+                drive: { dist: "160 km", time: "2.5 hr", route: "1 號公路" },
                 tips: [
-                    { type: "shopping", text: "Vík (Krónan) 補給：羊排、鮭魚、Skyr。" },
-                    { type: "safety", text: "黑沙灘風浪極大，注意瘋狗浪，空拍注意強風。" }
+                    { type: "safety", text: "黑沙灘 (Reynisfjara) 有致命瘋狗浪，絕對不要背對海洋，遠離海水。" },
+                    { type: "car", text: "此區為強風區！開車門務必雙手抓緊，避免車門被吹斷。" },
+                    { type: "shopping", text: "Vík (Krónan/Olís) 第二階段補給：羊排、鮭魚、Skyr、新鮮蔬菜。" },
+                    { type: "drone", text: "Seljalandsfoss 與 Skógafoss 遊客眾多，通常有禁飛標誌。" }
                 ],
                 locations: [
-                    { name: "Vík (Start)", mapName: "Vík í Mýrdal", coords: [63.4186, -19.0060], type: "start", desc: "上午行程", icon: "fa-car" },
-                    { name: "Seljalandsfoss", mapName: "Seljalandsfoss", coords: [63.6156, -19.9885], type: "sight", desc: "水簾洞瀑布 (禁飛)。", icon: "fa-water" },
-                    { name: "Skógafoss", mapName: "Skógafoss", coords: [63.5320, -19.5113], type: "sight", desc: "彩虹瀑布 (禁飛)。", icon: "fa-water" },
-                    { name: "Dyrhólaey", mapName: "Dyrhólaey Viewpoint", coords: [63.4026, -19.1311], type: "sight", desc: "海蝕洞與海鸚 (Puffins)。", icon: "fa-binoculars" },
-                    { name: "Reynisfjara Beach", mapName: "Reynisfjara Beach", coords: [63.4057, -19.0716], type: "sight", desc: "黑沙灘與玄武岩柱。", icon: "fa-umbrella-beach" },
-                    { name: "Restaurant Suður-Vík", mapName: "Suður-Vík", coords: [63.4194, -19.0134], type: "food", desc: "晚餐推薦。", icon: "fa-utensils" },
-                    { name: "Vík Accommodation", mapName: "Vík í Mýrdal", coords: [63.4186, -19.0060], type: "stay", desc: "續住維克。", icon: "fa-bed" }
+                    { name: "Vík (Start)", mapName: "Vík í Mýrdal", coords: [63.4186, -19.0060], type: "start", desc: "09:30 出發。", icon: "fa-car", droneTag: "allowed" },
+                    { name: "Seljalandsfoss", mapName: "Seljalandsfoss", coords: [63.6156, -19.9885], type: "sight", desc: "水簾洞瀑布。", icon: "fa-water", droneTag: "forbidden" },
+                    { name: "Skógafoss", mapName: "Skógafoss", coords: [63.5320, -19.5113], type: "sight", desc: "彩虹瀑布。", icon: "fa-water", droneTag: "forbidden" },
+                    { name: "Dyrhólaey", mapName: "Dyrhólaey Viewpoint", coords: [63.4026, -19.1311], type: "sight", desc: "海蝕洞與海鸚 (Puffins)。", icon: "fa-binoculars", droneTag: "forbidden" },
+                    { name: "Reynisfjara Beach", mapName: "Reynisfjara Beach", coords: [63.4057, -19.0716], type: "sight", desc: "黑沙灘與玄武岩柱。", icon: "fa-umbrella-beach", droneTag: "allowed" },
+                    { name: "Restaurant Suður-Vík", mapName: "Suður-Vík", coords: [63.4194, -19.0134], type: "food", desc: "晚餐推薦。", icon: "fa-utensils", droneTag: "forbidden" },
+                    { name: "Vík", mapName: "Vík í Mýrdal", coords: [63.4186, -19.0060], type: "stay", desc: "續住 Vík。", icon: "fa-bed", droneTag: "allowed" }
                 ]
             },
             {
@@ -206,124 +221,154 @@
                 date: "6/23",
                 title: "冰川健行日",
                 summary: "挑戰冰島最大的瓦特納冰川。",
+                drive: { dist: "140 km", time: "2 hr", route: "1 號公路" },
                 tips: [
-                    { type: "gear", text: "請穿著硬底登山鞋，方便穿冰爪。" }
+                    { type: "activity", text: "冰川健行預約中午場次，需提前 15-20 分鐘報到。" },
+                    { type: "gear", text: "請穿著硬底登山鞋，方便穿著冰爪。" },
+                    { type: "drone", text: "冰川健行區域 (Skaftafell) 屬於國家公園，嚴格禁飛。" },
+                    { type: "drone", text: "羽毛峽谷 (Fjaðrárgljúfur) 僅限停車場周邊區域起飛，峽谷內部禁飛。" }
                 ],
                 locations: [
-                    { name: "Vík (Start)", mapName: "Vík í Mýrdal", coords: [63.4186, -19.0060], type: "start", desc: "前往冰川區", icon: "fa-car" },
-                    { name: "Fjaðrárgljúfur", mapName: "Fjaðrárgljúfur", coords: [63.7712, -18.1718], type: "sight", desc: "羽毛峽谷 (Justin Bieber MV 場景)。", icon: "fa-water" },
-                    { name: "Skaftafell", mapName: "Skaftafell", coords: [64.0163, -16.9664], type: "activity", desc: "冰川健行集合點。", icon: "fa-person-hiking" },
-                    { name: "Hof / Jökulsárlón Area", mapName: "Hof, Iceland", coords: [63.9073, -16.7067], type: "stay", desc: "住宿 Hof 或冰河湖附近。", icon: "fa-bed" }
+                    { name: "Vík (Start)", mapName: "Vík í Mýrdal", coords: [63.4186, -19.0060], type: "start", desc: "09:00 出發。", icon: "fa-car", droneTag: "allowed" },
+                    { name: "Fjaðrárgljúfur", mapName: "Fjaðrárgljúfur", coords: [63.7712, -18.1718], type: "sight", desc: "羽毛峽谷 (Justin Bieber MV 場景)。", icon: "fa-water", droneTag: "allowed" },
+                    { name: "Kjarval Kirkjubæjarklaustur", mapName: "Kjarval Kirkjubæjarklaustur", coords: [63.7924, -18.0515], type: "shopping", desc: "途中補給點 (小型超市)。", icon: "fa-cart-shopping" },
+                    { name: "Skaftafell", mapName: "Skaftafell", coords: [64.0163, -16.9664], type: "activity", desc: "冰川健行集合點。", icon: "fa-person-hiking", droneTag: "forbidden" },
+                    { name: "Hof Area", mapName: "Hof, Iceland", coords: [63.9073, -16.7067], type: "stay", desc: "住宿 Hof (Hofskirkja) 或冰河湖附近。", icon: "fa-bed" }
                 ]
             },
             {
                 day: 7,
                 date: "6/24",
-                title: "秘境峽谷與冰河湖",
-                summary: "探索秘境與鑽石沙灘。",
+                title: "秘境峽谷與龍蝦大餐",
+                summary: "魔戒峽谷健行與鑽石沙灘。",
+                drive: { dist: "130 km", time: "2 hr", route: "1 號公路" },
                 tips: [
-                    { type: "food", text: "晚餐：Pakkhús Restaurant (Höfn 龍蝦)。" },
-                    { type: "drone", text: "Múlagljúfur 為絕佳空拍點 🚁。" }
+                    { type: "activity", text: "Múlagljúfur 健行+空拍需預留 3-4 小時。" },
+                    { type: "food", text: "Pakkhús (龍蝦) 不接受訂位，建議開門前去排隊。" },
+                    { type: "drone", text: "Jökulsárlón 冰河湖因有水陸兩棲船與遊客，通常禁飛。" },
+                    { type: "drone", text: "Múlagljúfur 為絕佳空拍點，可拍出電影場景感 🚁。" }
                 ],
                 locations: [
-                    { name: "Hof (Start)", mapName: "Hof, Iceland", coords: [63.9073, -16.7067], type: "start", desc: "前往秘境", icon: "fa-car" },
-                    { name: "Múlagljúfur Canyon", mapName: "Múlagljúfur Canyon", coords: [63.9930, -16.4363], type: "sight", desc: "隱藏版峽谷健行 (3h)。", icon: "fa-mountain" },
-                    { name: "Jökulsárlón", mapName: "Jökulsárlón", coords: [64.0484, -16.1794], type: "sight", desc: "傑古沙龍冰河湖。", icon: "fa-icicles" },
-                    { name: "Diamond Beach", mapName: "Diamond Beach", coords: [64.0442, -16.1777], type: "sight", desc: "鑽石沙灘。", icon: "fa-gem" },
-                    { name: "Höfn (Netto)", mapName: "Nettó Höfn", coords: [64.2541, -15.2078], type: "shopping", desc: "海鮮補給。", icon: "fa-cart-shopping" },
-                    { name: "Höfn Accommodation", mapName: "Höfn", coords: [64.2497, -15.2020], type: "stay", desc: "住宿龍蝦小鎮。", icon: "fa-bed" }
+                    { name: "Hof (Start)", mapName: "Hof, Iceland", coords: [63.9073, -16.7067], type: "start", desc: "08:30 出發。", icon: "fa-car", droneTag: "allowed" },
+                    { name: "Múlagljúfur Canyon", mapName: "Múlagljúfur Canyon", coords: [63.9930, -16.4363], type: "sight", desc: "隱藏版魔戒峽谷 (必飛 🚁)。", icon: "fa-mountain", droneTag: "must" },
+                    { name: "Jökulsárlón", mapName: "Jökulsárlón", coords: [64.0484, -16.1794], type: "sight", desc: "冰河湖。", icon: "fa-icicles", droneTag: "forbidden" },
+                    { name: "Diamond Beach", mapName: "Diamond Beach", coords: [64.0442, -16.1777], type: "sight", desc: "鑽石沙灘。", icon: "fa-gem", droneTag: "forbidden" },
+                    { name: "Pakkhús Restaurant", mapName: "Pakkhús Restaurant", coords: [64.2541, -15.2078], type: "food", desc: "晚餐：龍蝦大餐。", icon: "fa-utensils", droneTag: "forbidden" },
+                    { name: "Höfn", mapName: "Höfn", coords: [64.2497, -15.2020], type: "stay", desc: "住宿赫本 (Höfn)。", icon: "fa-bed" }
                 ]
             },
             {
                 day: 8,
                 date: "6/25",
-                title: "天空之鏡與峽灣公路",
+                title: "天空之鏡與東峽灣",
                 summary: "東部海岸線移動日。",
+                drive: { dist: "250 km", time: "3.5 hr", route: "1 號公路" },
                 tips: [
-                    { type: "shopping", text: "Egilsstaðir (Nettó) 為東部最重要補給點。" }
+                    { type: "drive", text: "東部隧道多為單向，務必開大燈。遇單向橋時，看標誌誰先到誰行。" },
+                    { type: "shopping", text: "Egilsstaðir (Nettó) 為東部最重要補給點，之後進入米湖物價較高。" },
+                    { type: "drone", text: "Vestrahorn 為私有地，需付費進入，但非常歡迎空拍 🚁。" }
                 ],
                 locations: [
-                    { name: "Höfn (Start)", mapName: "Höfn", coords: [64.2497, -15.2020], type: "start", desc: "前往東部", icon: "fa-car" },
-                    { name: "Vestrahorn", mapName: "Vestrahorn", coords: [64.2435, -14.9669], type: "sight", desc: "蝙蝠山/天空之鏡 (私有地需付費)。", icon: "fa-camera" },
-                    { name: "Egilsstaðir", mapName: "Egilsstaðir", coords: [65.2669, -14.3948], type: "shopping", desc: "中途休息、超市補給。", icon: "fa-cart-shopping" },
-                    { name: "Seyðisfjörður", mapName: "Seyðisfjörður", coords: [65.2598, -14.0101], type: "stay", desc: "白日夢冒險王滑板路小鎮。", icon: "fa-bed" }
+                    { name: "Höfn (Start)", mapName: "Höfn", coords: [64.2497, -15.2020], type: "start", desc: "09:00 出發。", icon: "fa-car", droneTag: "allowed" },
+                    { name: "Vestrahorn", mapName: "Vestrahorn", coords: [64.2435, -14.9669], type: "sight", desc: "蝙蝠山/天空之鏡 (私有地)。", icon: "fa-camera", droneTag: "must" },
+                    { name: "Egilsstaðir", mapName: "Egilsstaðir", coords: [65.2669, -14.3948], type: "shopping", desc: "中途休息、超市補給。", icon: "fa-cart-shopping", droneTag: "allowed" },
+                    { name: "Seyðisfjörður", mapName: "Seyðisfjörður", coords: [65.2598, -14.0101], type: "stay", desc: "白日夢冒險王小鎮。", icon: "fa-bed", droneTag: "allowed" }
                 ]
             },
             {
                 day: 9,
                 date: "6/26",
-                title: "幾何峽谷與外星地貌",
-                summary: "壯觀的玄武岩峽谷與地熱區。",
+                title: "碎石公路與外星地貌",
+                summary: "玄武岩峽谷與魔鬼瀑布。",
+                drive: { dist: "200 km", time: "3 hr", route: "1 ➔ 923 ➔ 864" },
                 tips: [
-                    { type: "drive", text: "864 公路路況差極傷底盤，請慢行。" },
-                    { type: "drone", text: "Stuðlagil 可空拍 🚁。" }
+                    { type: "drive", text: "864 公路碎石極多 (洗衣板路)，非常傷底盤，建議時速 40km 減震。" },
+                    { type: "drone", text: "Stuðlagil 可空拍 🚁。Dettifoss 屬於國家公園禁飛。" },
+                    { type: "food", text: "米湖 Vogafjós Farm Resort 晚餐建議預約。" }
                 ],
                 locations: [
-                    { name: "Seyðisfjörður (Start)", mapName: "Seyðisfjörður", coords: [65.2598, -14.0101], type: "start", desc: "前往米湖區", icon: "fa-car" },
-                    { name: "Stuðlagil Canyon", mapName: "Stuðlagil Canyon", coords: [65.1635, -15.3070], type: "sight", desc: "玄武岩柱峽谷 (走東側)。", icon: "fa-mountain" },
-                    { name: "Dettifoss", mapName: "Dettifoss", coords: [65.8146, -16.3846], type: "sight", desc: "魔鬼瀑布 (歐洲水量最大)。", icon: "fa-water" },
-                    { name: "Hverir", mapName: "Hverir", coords: [65.6409, -16.8093], type: "sight", desc: "地熱區，硫磺味重。", icon: "fa-fire" },
-                    { name: "Mývatn Accommodation", mapName: "Mývatn", coords: [65.6062, -16.9942], type: "stay", desc: "住宿米湖區。", icon: "fa-bed" }
+                    { name: "Seyðisfjörður (Start)", mapName: "Seyðisfjörður", coords: [65.2598, -14.0101], type: "start", desc: "08:30 出發。", icon: "fa-car", droneTag: "allowed" },
+                    { name: "Nettó Egilsstaðir", mapName: "Nettó Egilsstaðir", coords: [65.2669, -14.3948], type: "shopping", desc: "離開東部前最後大超市。", icon: "fa-cart-shopping" },
+                    { name: "Stuðlagil Canyon", mapName: "Stuðlagil Canyon", coords: [65.1635, -15.3070], type: "sight", desc: "玄武岩柱峽谷 (走東側)。", icon: "fa-mountain", droneTag: "allowed" },
+                    { name: "Dettifoss", mapName: "Dettifoss", coords: [65.8146, -16.3846], type: "sight", desc: "魔鬼瀑布 (走 864 東側)。", icon: "fa-water", droneTag: "forbidden" },
+                    { name: "Hverir", mapName: "Hverir", coords: [65.6409, -16.8093], type: "sight", desc: "地熱區，硫磺味重。", icon: "fa-fire", droneTag: "allowed" },
+                    { name: "Mývatn", mapName: "Mývatn", coords: [65.6062, -16.9942], type: "stay", desc: "住宿米湖區。", icon: "fa-bed" }
                 ]
             },
             {
                 day: 10,
                 date: "6/27",
-                title: "眾神瀑布與啤酒慶典",
-                summary: "米湖周邊與特色啤酒溫泉。",
+                title: "賞鯨與海邊溫泉",
+                summary: "眾神瀑布、胡薩維克與阿克雷里。",
+                drive: { dist: "120 km", time: "2 hr", route: "1 ➔ 82 號" },
                 tips: [
-                    { type: "activity", text: "Bjórböðin 啤酒溫泉很特別。" }
+                    { type: "activity", text: "Húsavík 賞鯨與 GeoSea 溫泉需提前預約。" },
+                    { type: "car", text: "進入 Akureyri 前的 Vaðlaheiði 隧道需上網繳費 (Vegid.is)，或繞路 84+83 (多花 15 分鐘)。" },
+                    { type: "drone", text: "眾神瀑布 (Goðafoss) 允許空拍，但要注意遊客與飛濺水霧。" }
                 ],
                 locations: [
-                    { name: "Mývatn (Start)", mapName: "Mývatn", coords: [65.6062, -16.9942], type: "start", desc: "前往北方之都", icon: "fa-car" },
-                    { name: "Goðafoss", mapName: "Goðafoss Waterfall", coords: [65.6828, -17.5502], type: "sight", desc: "眾神瀑布。", icon: "fa-water" },
-                    { name: "Bjórböðin", mapName: "Bjórböðin - The Beer Spa", coords: [65.9525, -18.5273], type: "activity", desc: "啤酒 SPA。", icon: "fa-hot-tub-person" },
-                    { name: "Akureyri Accommodation", mapName: "Akureyri", coords: [65.6835, -18.0878], type: "stay", desc: "住宿北方之都。", icon: "fa-bed" }
+                    { name: "Mývatn (Start)", mapName: "Mývatn", coords: [65.6062, -16.9942], type: "start", desc: "08:30 出發。", icon: "fa-car", droneTag: "allowed" },
+                    { name: "Goðafoss", mapName: "Goðafoss Waterfall", coords: [65.6828, -17.5502], type: "sight", desc: "眾神瀑布。", icon: "fa-water", droneTag: "allowed" },
+                    { name: "Húsavík", mapName: "Húsavík", coords: [66.0449, -17.3389], type: "activity", desc: "歐洲賞鯨之都。", icon: "fa-ship", droneTag: "forbidden" },
+                    { name: "GeoSea", mapName: "GeoSea - Geothermal Sea Baths", coords: [66.0522, -17.3618], type: "activity", desc: "無邊際海邊溫泉。", icon: "fa-hot-tub-person", droneTag: "forbidden" },
+                    { name: "Bónus Akureyri", mapName: "Bónus Akureyri", coords: [65.6961, -18.1028], type: "shopping", desc: "抵達北部之都補貨。", icon: "fa-cart-shopping" },
+                    { name: "Akureyri", mapName: "Akureyri", coords: [65.6835, -18.0878], type: "stay", desc: "住宿阿克雷里。", icon: "fa-bed" }
                 ]
             },
             {
                 day: 11,
                 date: "6/28",
-                title: "北方大補貨與海上犀牛",
+                title: "北方大補貨與巨人峽谷",
                 summary: "西北部海岸線。",
+                drive: { dist: "200 km", time: "3 hr", route: "1 ➔ 711 碎石路" },
                 tips: [
-                    { type: "shopping", text: "Akureyri (Krónan/Bónus) 務必補滿 4 天份生鮮！" },
-                    { type: "drone", text: "犀牛石適合空拍 🚁。" }
+                    { type: "shopping", text: "Akureyri (Krónan/Bónus) 為第三階段補給，務必在此補滿接下來 4 天份生鮮！西北區無大超市。" },
+                    { type: "drive", text: "711 公路多碎石且灰塵大，會車請減速保持距離。" },
+                    { type: "drone", text: "Kolugljúfur 由橋垂直下拍必備 🚁。Hvítserkur 犀牛石適合低飛環繞。" }
                 ],
                 locations: [
-                    { name: "Akureyri (Shopping)", mapName: "Akureyri", coords: [65.6835, -18.0878], type: "shopping", desc: "第三階段大補給。", icon: "fa-cart-shopping" },
-                    { name: "Hvítserkur", mapName: "Hvítserkur", coords: [65.6063, -20.6353], type: "sight", desc: "犀牛石與海豹。", icon: "fa-camera" },
-                    { name: "Hvammstangi Area", mapName: "Hvammstangi", coords: [65.3973, -20.9400], type: "stay", desc: "住宿西北小鎮。", icon: "fa-bed" }
+                    { name: "Akureyri (Shopping)", mapName: "Akureyri", coords: [65.6835, -18.0878], type: "shopping", desc: "09:00 出發，第三階段大補給。", icon: "fa-cart-shopping", droneTag: "forbidden" },
+                    { name: "Kolugljúfur", mapName: "Kolugljúfur Canyon", coords: [65.3326, -20.5714], type: "sight", desc: "巨人峽谷。", icon: "fa-mountain", droneTag: "must" },
+                    { name: "Hvítserkur", mapName: "Hvítserkur", coords: [65.6063, -20.6353], type: "sight", desc: "犀牛石與海豹。", icon: "fa-camera", droneTag: "must" },
+                    { name: "Hvammstangi", mapName: "Hvammstangi", coords: [65.3973, -20.9400], type: "stay", desc: "住宿西北小鎮。", icon: "fa-bed" }
                 ]
             },
             {
                 day: 12,
                 date: "6/29",
-                title: "跨海大橋與地標",
-                summary: "進入斯奈山半島。",
+                title: "斯奈山半島：地標巡禮",
+                summary: "跨海大橋與教堂山。",
+                drive: { dist: "230 km", time: "3 hr", route: "54 ➔ 56" },
                 tips: [
-                    { type: "drone", text: "跨海大橋線條感必拍 🚁。" }
+                    { type: "weather", text: "半島側風極強，空拍機起飛前務必確認 Vedur 陣風數據。" },
+                    { type: "drone", text: "Kolgrafarfjörður 跨海大橋幾何線條必拍 🚁。" },
+                    { type: "drone", text: "教堂山 (Kirkjufell) 建議於瀑布對面起飛，避開人群。" }
                 ],
                 locations: [
-                    { name: "Hvammstangi (Start)", mapName: "Hvammstangi", coords: [65.3973, -20.9400], type: "start", desc: "前往斯奈山半島", icon: "fa-car" },
-                    { name: "Kolgrafarfjörður", mapName: "Kolgrafarfjörður", coords: [64.9663, -23.1362], type: "sight", desc: "刀劍形狀跨海大橋。", icon: "fa-bridge" },
-                    { name: "Kirkjufell", mapName: "Kirkjufell", coords: [64.9417, -23.3069], type: "sight", desc: "教堂山 (權力遊戲場景)。", icon: "fa-mountain" },
+                    { name: "Hvammstangi (Start)", mapName: "Hvammstangi", coords: [65.3973, -20.9400], type: "start", desc: "09:30 出發。", icon: "fa-car", droneTag: "allowed" },
+                    { name: "Samkaup Búðardalur", mapName: "Samkaup Búðardalur", coords: [65.1093, -21.7634], type: "shopping", desc: "進入半島前的補給站。", icon: "fa-cart-shopping" },
+                    { name: "Kolgrafarfjörður", mapName: "Kolgrafarfjörður", coords: [64.9663, -23.1362], type: "sight", desc: "刀劍形狀跨海大橋。", icon: "fa-bridge", droneTag: "must" },
+                    { name: "Kirkjufell", mapName: "Kirkjufell", coords: [64.9417, -23.3069], type: "sight", desc: "教堂山 (權力遊戲場景)。", icon: "fa-mountain", droneTag: "must" },
                     { name: "Grundarfjörður", mapName: "Grundarfjörður", coords: [64.9242, -23.2608], type: "stay", desc: "住宿教堂山腳下。", icon: "fa-bed" }
                 ]
             },
             {
                 day: 13,
                 date: "6/30",
-                title: "黑教堂與回程",
-                summary: "半島南側與返回雷克雅維克。",
+                title: "黑教堂與重返首都",
+                summary: "半島南側與海底隧道。",
+                drive: { dist: "200 km", time: "3 hr", route: "54 ➔ 1 號" },
                 tips: [
-                    { type: "drone", text: "黑教堂對比強烈，適合空拍 🚁。" }
+                    { type: "drive", text: "回雷克雅維克的 Hvalfjörður 海底隧道免收費，但長且深，注意車速限制。" },
+                    { type: "shopping", text: "Borgarnes 為大型中繼站，有大超市與廁所。" },
+                    { type: "drone", text: "黑教堂 (Búðakirkja) 黑白對比強烈，適合空拍 🚁。" }
                 ],
                 locations: [
-                    { name: "Grundarfjörður (Start)", mapName: "Grundarfjörður", coords: [64.9242, -23.2608], type: "start", desc: "環半島南下", icon: "fa-car" },
-                    { name: "Búðakirkja", mapName: "Búðakirkja", coords: [64.8218, -23.3846], type: "sight", desc: "著名的黑教堂。", icon: "fa-church" },
-                    { name: "Arnarstapi", mapName: "Arnarstapi", coords: [64.7662, -23.6214], type: "sight", desc: "海蝕洞與巨人石像。", icon: "fa-water" },
-                    { name: "Reykjavík Accommodation", mapName: "Reykjavík", coords: [64.1466, -21.9426], type: "stay", desc: "返回首都。", icon: "fa-bed" }
+                    { name: "Grundarfjörður (Start)", mapName: "Grundarfjörður", coords: [64.9242, -23.2608], type: "start", desc: "10:00 出發。", icon: "fa-car", droneTag: "allowed" },
+                    { name: "Búðakirkja", mapName: "Búðakirkja", coords: [64.8218, -23.3846], type: "sight", desc: "著名的黑教堂。", icon: "fa-church", droneTag: "allowed" },
+                    { name: "Arnarstapi", mapName: "Arnarstapi", coords: [64.7662, -23.6214], type: "sight", desc: "海蝕洞與巨人石像。", icon: "fa-water", droneTag: "allowed" },
+                    { name: "Borgarnes", mapName: "Borgarnes", coords: [64.5381, -21.9223], type: "shopping", desc: "中途休息、超市與廁所。", icon: "fa-mug-hot" },
+                    { name: "Reykjavík", mapName: "Reykjavík", coords: [64.1466, -21.9426], type: "stay", desc: "返回首都。", icon: "fa-bed" }
                 ]
             },
             {
@@ -331,27 +376,36 @@
                 date: "7/01",
                 title: "雷克雅維克深度遊",
                 summary: "市區採買、整理影片、慶功大餐。",
+                drive: { dist: "0-20 km", time: "-", route: "市區" },
                 tips: [
-                    { type: "shopping", text: "66°North 採買伴手禮。" },
-                    { type: "food", text: "晚餐：Grillmarkaðurinn 慶功宴。" }
+                    { type: "shopping", text: "市區購物：66°North、Omnom 巧克力、Harpa 音樂廳買星巴克杯。" },
+                    { type: "food", text: "慶功宴：Grillmarkaðurinn (需預約)。" },
+                    { type: "drone", text: "雷克雅維克市區包含 Harpa、教堂皆為禁飛區 🚫。" }
                 ],
                 locations: [
-                    { name: "Reykjavík City", mapName: "Reykjavík", coords: [64.1466, -21.9426], type: "sight", desc: "全日市區活動。", icon: "fa-city" },
+                    { name: "Hallgrimskirkja", mapName: "Hallgrimskirkja", coords: [64.1420, -21.9266], type: "sight", desc: "哈爾格林姆教堂。", icon: "fa-church", droneTag: "forbidden" },
+                    { name: "Regnbogagatan", mapName: "Rainbow Street, Reykjavik", coords: [64.1432, -21.9306], type: "sight", desc: "彩虹街道 (Skólavörðustígur)。", icon: "fa-camera", droneTag: "forbidden" },
+                    { name: "Sun Voyager", mapName: "Sun Voyager", coords: [64.1476, -21.9223], type: "sight", desc: "太陽航海者。", icon: "fa-sailboat", droneTag: "forbidden" },
+                    { name: "Harpa", mapName: "Harpa Concert Hall and Conference Centre", coords: [64.1504, -21.9326], type: "sight", desc: "音樂廳 (買星巴克杯)。", icon: "fa-music", droneTag: "forbidden" },
+                    { name: "Omnom Chocolate", mapName: "Omnom Chocolate", coords: [64.1444, -21.9566], type: "shopping", desc: "冰島著名巧克力。", icon: "fa-cookie-bite" },
+                    { name: "Perlan", mapName: "Perlan", coords: [64.1293, -21.9189], type: "sight", desc: "珍珠樓，俯瞰市景。", icon: "fa-building", droneTag: "forbidden" },
                     { name: "Grillmarkaðurinn", mapName: "Grillmarkaðurinn", coords: [64.1475, -21.9392], type: "food", desc: "慶功大餐。", icon: "fa-utensils" }
                 ]
             },
             {
                 day: 15,
                 date: "7/02",
-                title: "最後採買與賦歸",
+                title: "最終巡禮與賦歸",
                 summary: "板塊橋與還車。",
+                drive: { dist: "50 km", time: "50 min", route: "41 號公路" },
                 tips: [
-                    { type: "safety", text: "記得預留還車檢查時間。" }
+                    { type: "safety", text: "14:30 前完成還車。記得加滿油與洗車 (若租車合約要求)。" },
+                    { type: "drone", text: "板塊橋 (Bridge Between Continents) 地形特殊，可空拍 🚁。" }
                 ],
                 locations: [
-                    { name: "Reykjavík (Start)", mapName: "Reykjavík", coords: [64.1466, -21.9426], type: "start", desc: "前往機場方向", icon: "fa-car" },
-                    { name: "Bridge Between Continents", mapName: "Bridge Between Continents", coords: [63.8680, -22.6756], type: "sight", desc: "兩大板塊橋。", icon: "fa-bridge" },
-                    { name: "Keflavík Airport", mapName: "Keflavík International Airport", coords: [63.9868, -22.6280], type: "airport", desc: "17:15 起飛。", icon: "fa-plane-departure" }
+                    { name: "Reykjavík (Start)", mapName: "Reykjavík", coords: [64.1466, -21.9426], type: "start", desc: "前往機場方向。", icon: "fa-car", droneTag: "forbidden" },
+                    { name: "Bridge Between Continents", mapName: "Bridge Between Continents", coords: [63.8680, -22.6756], type: "sight", desc: "兩大板塊橋 (可空拍 🚁)。", icon: "fa-bridge", droneTag: "allowed" },
+                    { name: "Keflavík Airport", mapName: "Keflavík International Airport", coords: [63.9868, -22.6280], type: "airport", desc: "17:15 起飛。", icon: "fa-plane-departure", droneTag: "forbidden" }
                 ]
             }
         ];
@@ -424,24 +478,51 @@
                 daySection.className = "day-section scroll-mt-28";
                 daySection.dataset.index = index; // For Intersection Observer
 
+                // Drive Info Block - Darker for visibility
+                let driveInfoHtml = '';
+                if (dayData.drive) {
+                    driveInfoHtml = `
+                        <div class="flex items-center gap-3 text-xs text-slate-700 bg-slate-100 p-2 rounded-lg mb-4 border border-slate-200 font-medium">
+                            <div class="flex items-center gap-1">
+                                <i class="fa-solid fa-road text-slate-500"></i>
+                                <span>${dayData.drive.dist}</span>
+                            </div>
+                            <div class="w-px h-3 bg-slate-300"></div>
+                            <div class="flex items-center gap-1">
+                                <i class="fa-regular fa-clock text-slate-500"></i>
+                                <span>${dayData.drive.time}</span>
+                            </div>
+                            <div class="w-px h-3 bg-slate-300"></div>
+                            <div class="flex items-center gap-1">
+                                <i class="fa-solid fa-signs-post text-slate-500"></i>
+                                <span>${dayData.drive.route}</span>
+                            </div>
+                        </div>
+                    `;
+                }
+
                 // Header
                 let headerHtml = `
-                    <div class="mb-6">
+                    <div class="mb-4">
                         <span class="inline-block px-2 py-1 bg-nordic-blue text-white text-xs font-bold rounded uppercase tracking-wider mb-1">Day ${dayData.day} · ${dayData.date}</span>
                         <h2 class="text-2xl font-bold text-gray-800">${dayData.title}</h2>
-                        <p class="text-gray-500 text-sm mt-1">${dayData.summary}</p>
+                        <p class="text-gray-500 text-sm mt-1 mb-2">${dayData.summary}</p>
+                        ${driveInfoHtml}
                     </div>
                 `;
 
                 // Tips Section
                 let tipsHtml = '';
                 if(dayData.tips && dayData.tips.length > 0) {
-                    tipsHtml = `<div class="bg-orange-50 border-l-4 border-orange-400 p-3 mb-6 rounded-r-lg text-sm text-orange-800 space-y-1">`;
+                    tipsHtml = `<div class="bg-orange-50 border-l-4 border-orange-400 p-3 mb-6 rounded-r-lg text-sm text-orange-800 space-y-2 shadow-sm">`;
                     dayData.tips.forEach(tip => {
                         let icon = tip.type === 'drone' ? 'fa-helicopter' : 
                                    tip.type === 'shopping' ? 'fa-cart-shopping' : 
-                                   tip.type === 'food' ? 'fa-utensils' : 'fa-circle-info';
-                        tipsHtml += `<div class="flex items-start gap-2"><i class="fa-solid ${icon} mt-1"></i><span>${tip.text}</span></div>`;
+                                   tip.type === 'food' ? 'fa-utensils' : 
+                                   tip.type === 'car' ? 'fa-car-side' : 
+                                   tip.type === 'safety' ? 'fa-shield-halved' : 
+                                   tip.type === 'weather' ? 'fa-wind' : 'fa-circle-info';
+                        tipsHtml += `<div class="flex items-start gap-2"><i class="fa-solid ${icon} mt-1 flex-shrink-0"></i><span>${tip.text}</span></div>`;
                     });
                     tipsHtml += `</div>`;
                 }
@@ -461,6 +542,23 @@
                         `;
                     }
 
+                    // Drone Status Badge - Explicit text based on tag
+                    let droneBadge = '';
+                    // Only show drone badge if NOT shopping, food, stay, start, or airport
+                    const hideDroneInfo = ['shopping', 'food', 'stay', 'start', 'airport'].includes(loc.type);
+                    
+                    if (!hideDroneInfo && loc.droneTag) {
+                        if (loc.droneTag === 'must') {
+                            droneBadge = `<span class="ml-auto flex-shrink-0 text-xs text-purple-700 bg-purple-50 px-2 py-0.5 rounded border border-purple-100 font-bold">🚁🚁 必拍聖地</span>`;
+                        } else if (loc.droneTag === 'allowed') {
+                            droneBadge = `<span class="ml-auto flex-shrink-0 text-xs text-green-700 bg-green-50 px-2 py-0.5 rounded border border-green-100">🚁 適合且目前開放</span>`;
+                        } else if (loc.droneTag === 'forbidden') {
+                            droneBadge = `<span class="ml-auto flex-shrink-0 text-xs text-red-600 bg-red-50 px-2 py-0.5 rounded border border-red-100">🚫 絕對禁飛</span>`;
+                        } else if (loc.droneTag === 'caution') { // Fallback if any remain
+                            droneBadge = `<span class="ml-auto flex-shrink-0 text-xs text-orange-600 bg-orange-50 px-2 py-0.5 rounded border border-orange-100">⚠️ 謹慎飛行</span>`;
+                        }
+                    }
+
                     // Location Card
                     locationsHtml += `
                         <div class="location-card relative group bg-white border border-gray-100 hover:border-nordic-blue/50 rounded-xl p-4 shadow-sm hover:shadow-md transition-all cursor-pointer"
@@ -469,16 +567,19 @@
                                 <div class="flex-shrink-0 w-10 h-10 rounded-full bg-nordic-light flex items-center justify-center text-nordic-blue group-hover:bg-nordic-blue group-hover:text-white transition-colors">
                                     <i class="fa-solid ${loc.icon}"></i>
                                 </div>
-                                <div class="flex-grow">
-                                    <h3 class="font-bold text-gray-800">${loc.name}</h3>
+                                <div class="flex-grow min-w-0">
+                                    <div class="flex justify-between items-start gap-2">
+                                        <h3 class="font-bold text-gray-800 truncate">${loc.name}</h3>
+                                        ${droneBadge}
+                                    </div>
                                     <p class="text-sm text-gray-500 mt-1">${loc.desc}</p>
-                                    <div class="mt-3">
+                                    <div class="mt-3 flex flex-wrap gap-2">
                                         <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(loc.mapName)}" target="_blank" 
                                            class="inline-flex items-center gap-1 text-xs text-nordic-blue hover:underline bg-blue-50 px-2 py-1 rounded"
                                            onclick="event.stopPropagation()">
                                             <i class="fa-brands fa-google"></i> View on Map
                                         </a>
-                                        ${loc.type === 'shopping' ? '<span class="ml-2 inline-flex items-center gap-1 text-xs text-green-600 bg-green-50 px-2 py-1 rounded">補給站</span>' : ''}
+                                        ${loc.type === 'shopping' ? '<span class="inline-flex items-center gap-1 text-xs text-green-600 bg-green-50 px-2 py-1 rounded">補給站</span>' : ''}
                                     </div>
                                 </div>
                             </div>
@@ -551,9 +652,6 @@
         // 4. Interactions
         
         // A. Intersection Observer for Scroll (Revised for Mobile)
-        // RootMargin explanation: 
-        // '-10% 0px -70% 0px' creates a narrow "active" band near the top of the container.
-        // It triggers when an element enters the area between 10% and 30% from the top.
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
